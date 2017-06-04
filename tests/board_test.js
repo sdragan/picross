@@ -1,0 +1,86 @@
+describe("Board", function () {
+    var board;
+    var BOARD_PRESET_WIDTH = 4;
+    var BOARD_PRESET_HEIGHT = 5;
+    var BOARD_PRESET = [0, 1, 0, 1, 0, 0, 0, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1, 1];
+
+    /**
+     *   0 1 0 1
+     *   0 0 0 0
+     *   1 1 1 1
+     *   0 1 1 1
+     *   1 0 1 1
+     */
+
+    beforeEach(function () {
+        board = new lowfat.Board(BOARD_PRESET_WIDTH, BOARD_PRESET_HEIGHT, BOARD_PRESET);
+    });
+
+    it("should return filled cells", function () {
+        expect(board.getIsFilled(0, 0)).toBe(false);
+        expect(board.getIsFilled(1, 2)).toBe(true);
+    });
+
+    it("should mark cells", function () {
+        expect(board.getIsMarked(1, 1)).toBe(false);
+        board.mark(1, 1);
+        expect(board.getIsMarked(1, 1)).toBe(true);
+    });
+
+    it("should not allow marking cells twice", function () {
+        expect(board.getIsMarked(1, 1)).toBe(false);
+        board.mark(1, 1);
+        expect(function () { board.mark(1, 1) }).toThrow();
+    });
+
+    it("should throw when out of bounds", function () {
+        expect(function() {board.getIsFilled(5, 5)}).toThrow();
+        expect(function() {board.getIsFilled(-1, 5)}).toThrow();
+        expect(function() {board.mark(5, 5)}).toThrow();
+        expect(function() {board.mark(-1, 5)}).toThrow();
+    });
+
+    it("should return groups in row", function () {
+        var expectedRow0 = [1, 1];
+        var expectedRow1 = [];
+        var expectedRow2 = [4];
+        var expectedRow3 = [3];
+        var expectedRow4 = [1, 2];
+
+        expect(board.getGroupsInRow(0)).toEqual(expectedRow0);
+        expect(board.getGroupsInRow(1)).toEqual(expectedRow1);
+        expect(board.getGroupsInRow(2)).toEqual(expectedRow2);
+        expect(board.getGroupsInRow(3)).toEqual(expectedRow3);
+        expect(board.getGroupsInRow(4)).toEqual(expectedRow4);
+    });
+
+    it("should return groups in col", function () {
+        var expectedCol0 = [1, 1];
+        var expectedCol1 = [1, 2];
+        var expectedCol2 = [3];
+        var expectedCol3 = [1, 3];
+
+        expect(board.getGroupsInCol(0)).toEqual(expectedCol0);
+        expect(board.getGroupsInCol(1)).toEqual(expectedCol1);
+        expect(board.getGroupsInCol(2)).toEqual(expectedCol2);
+        expect(board.getGroupsInCol(3)).toEqual(expectedCol3);
+    });
+
+    it("should init with marked cells array", function () {
+        board = new lowfat.Board(2, 2, [1, 0, 0, 1], [1, 1, 1, 0]);
+        expect(board.getIsMarked(1, 0)).toBe(true);
+        expect(board.getIsMarked(1, 1)).toBe(false);
+
+        board = new lowfat.Board(2, 2, [1, 0, 0, 1], []);
+        expect(board.getIsMarked(1, 0)).toBe(false);
+        expect(board.getIsMarked(1, 1)).toBe(false);
+
+        board = new lowfat.Board(2, 2, [1, 0, 0, 1]);
+        expect(board.getIsMarked(1, 0)).toBe(false);
+        expect(board.getIsMarked(1, 1)).toBe(false);
+
+        expect(function () {
+            board = new lowfat.Board(2, 2, [1, 0, 0, 1], [1, 1, 1]);
+        }).toThrow();
+    });
+});
