@@ -16,6 +16,11 @@ describe("Board", function () {
         board = new lowfat.Board(BOARD_PRESET_WIDTH, BOARD_PRESET_HEIGHT, BOARD_PRESET);
     });
 
+    it("should return width and height", function () {
+        expect(board.getWidth()).toBe(4);
+        expect(board.getHeight()).toBe(5);
+    });
+
     it("should return filled cells", function () {
         expect(board.getIsFilled(0, 0)).toBe(false);
         expect(board.getIsFilled(1, 2)).toBe(true);

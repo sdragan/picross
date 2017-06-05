@@ -1,4 +1,6 @@
 var res = {
+    spritesheet_png: "res/spritesheet.png",
+    spritesheet_plist: "res/spritesheet.plist"
 };
 
 var g_resources = [];

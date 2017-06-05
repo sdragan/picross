@@ -1,3 +1,5 @@
+var lowfat = lowfat || {};
+
 cc.game.onStart = function(){
     var sys = cc.sys;
     if(!sys.isNative && document.getElementById("cocosLoading"))
@@ -14,10 +16,13 @@ cc.game.onStart = function(){
 
     cc.view.adjustViewPort(true);
     // cc.view.setOrientation(cc.ORIENTATION_PORTRAIT);
-    cc.view.setDesignResolutionSize(480, 720, cc.ResolutionPolicy.FIXED_HEIGHT);
+    cc.view.setDesignResolutionSize(420, 720, cc.ResolutionPolicy.FIXED_HEIGHT);
     cc.view.resizeWithBrowserSize(true);
 
     cc.LoaderScene.preload(g_resources, function () {
+        var texture = cc.textureCache.addImage(res.spritesheet_png);
+        cc.spriteFrameCache.addSpriteFrames(res.spritesheet_plist, texture);
+
         var gamefieldScene = new GamefieldScene();
         gamefieldScene.setup();
         cc.director.runScene(gamefieldScene);

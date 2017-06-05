@@ -72,6 +72,14 @@ lowfat.Board = function (cols, rows, elementsArray, marksArray) {
         return marks[y * width + x] == 1;
     };
 
+    this.getWidth = function () {
+        return width;
+    };
+
+    this.getHeight = function () {
+        return height;
+    };
+
     function checkBounds(x, y) {
         if (x >= width || x < 0 || y >= height || y < 0) {
             throw new Error("Cell " + x + ", " + y + " is out of bounds");
