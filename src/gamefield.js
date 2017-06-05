@@ -6,6 +6,8 @@ lowfat.Gamefield = function (scene, spriteManager) {
     var board = null;
     var boardDimensions = null;
 
+    var controls = null;
+
     var gridContainer = null;
 
     function initVars() {
@@ -20,15 +22,20 @@ lowfat.Gamefield = function (scene, spriteManager) {
         container.addChild(gridContainer);
     }
 
-    function buildBoard() {
+    function initControls() {
+        controls = new lowfat.TouchControls(scene, boardDimensions, selectCell);
+        controls.init();
+    }
+
+    function drawBoard() {
         for (var row = 0; row < board.getHeight(); row++) {
             for (var col = 0; col < board.getWidth(); col++) {
                 var gridCell = spriteManager.getSprite("GridCell");
-                gridCell.setPosition(boardDimensions.cellXToPoints(col), boardDimensions.cellYToPoints(row));
+                gridCell.setPosition(boardDimensions.cellToPointsX(col), boardDimensions.cellToPointsY(row));
                 gridContainer.addChild(gridCell);
 
                 // var cellContent = board.getIsFilled(col, row) ? spriteManager.getSprite("CellFilled") : spriteManager.getSprite("CellEmptySmall");
-                // cellContent.setPosition(boardDimensions.cellXToPoints(col), boardDimensions.cellYToPoints(row));
+                // cellContent.setPosition(boardDimensions.cellToPointsX(col), boardDimensions.cellToPointsY(row));
                 // gridContainer.addChild(cellContent);
             }
         }
@@ -37,10 +44,112 @@ lowfat.Gamefield = function (scene, spriteManager) {
     this.start = function () {
         initVars();
         initLayers();
-        buildBoard();
+        initControls();
+        drawBoard();
     };
+
+    function selectCell(cellX, cellY) {
+        if (board.getIsMarked(cellX, cellY)) {
+            return;
+        }
+
+        board.mark(cellX, cellY);
+
+        if (board.getIsFilled(cellX, cellY)) {
+            revealFilledCell(cellX, cellY);
+        } else {
+            revealMistake(cellX, cellY);
+            controls.forceStopDrag();
+        }
+    }
+
+    function revealFilledCell(cellX, cellY) {
+        var cellContent = spriteManager.getSprite("CellFilled");
+        cellContent.setPosition(boardDimensions.cellToPointsX(cellX), boardDimensions.cellToPointsY(cellY));
+        gridContainer.addChild(cellContent);
+
+        var upScaleAction = new cc.ScaleTo(0.1, 1.1, 1.1).easing(cc.easeCubicActionOut());
+        var waitAction = new cc.DelayTime(0.15);
+        var scaleDownAction = new cc.ScaleTo(0.25, 1, 1).easing(cc.easeQuadraticActionOut());
+        var sequence = new cc.Sequence(upScaleAction, waitAction, scaleDownAction);
+        cellContent.runAction(sequence);
+    }
+
+    function revealMistake(cellX, cellY) {
+        var cellContent = spriteManager.getSprite("CellMistake");
+        cellContent.setPosition(boardDimensions.cellToPointsX(cellX), boardDimensions.cellToPointsY(cellY));
+        gridContainer.addChild(cellContent);
+
+        var upScaleAction = new cc.ScaleTo(0.1, 1.1, 1.1).easing(cc.easeCubicActionOut());
+        var waitAction = new cc.DelayTime(0.15);
+        var scaleDownAction = new cc.ScaleTo(0.25, 1, 1).easing(cc.easeQuadraticActionOut());
+        var sequence = new cc.Sequence(upScaleAction, waitAction, scaleDownAction);
+        cellContent.runAction(sequence);
+    }
 
     this.onResize = function (screenSizeInPoints) {
         boardDimensions.resize(screenSizeInPoints);
+    }
+};
+
+lowfat.TouchControls = function (scene, boardDimensions, selectCellCallback) {
+    var touchStarted = false;
+
+    this.init = function () {
+        this.addListeners();
+    };
+
+    this.addListeners = function () {
+        cc.eventManager.addListener({
+            event: cc.EventListener.TOUCH_ONE_BY_ONE,
+            swallowTouches: true,
+            onTouchBegan: function (touch, event) {
+                processTouchStarted(touch.getLocation().x, touch.getLocation().y);
+                return true;
+            },
+            onTouchMoved: function (touch, event) {
+                processTouchUpdated(touch.getLocation().x, touch.getLocation().y, touch.getDelta())
+            },
+            onTouchEnded: function (touch, event) {
+                processTouchEnded(touch.getLocation().x, touch.getLocation().y);
+            }
+        }, scene);
+    };
+
+    this.removeListeners = function () {
+        cc.eventManager.removeListeners(cc.EventListener.TOUCH_ONE_BY_ONE);
+    };
+
+    this.forceStopDrag = function () {
+        touchStarted = false;
+    };
+
+    function processTouchStarted(touchX, touchY) {
+        if (!checkInsideBoard(touchX, touchY)) {
+            return;
+        }
+
+        touchStarted = true;
+        selectCellCallback(boardDimensions.pointsToCellX(touchX), boardDimensions.pointsToCellY(touchY));
+    }
+
+    function processTouchUpdated(touchX, touchY, delta) {
+        if (!touchStarted || !checkInsideBoard(touchX, touchY)) {
+            return;
+        }
+
+        selectCellCallback(boardDimensions.pointsToCellX(touchX), boardDimensions.pointsToCellY(touchY));
+    }
+
+    function processTouchEnded(touchX, touchY) {
+        if (!touchStarted) {
+            return;
+        }
+
+        touchStarted = false;
+    }
+
+    function checkInsideBoard(touchX, touchY) {
+        return touchX > boardDimensions.getLeftX() && touchX < boardDimensions.getRightX() && touchY > boardDimensions.getBottomY() && touchY < boardDimensions.getTopY();
     }
 };

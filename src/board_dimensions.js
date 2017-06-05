@@ -50,11 +50,11 @@ lowfat.BoardDimensions = function (cols, rows, screenSizeInPoints) {
         return rows - Math.ceil((pointsY - this.getBottomY()) / this.getCellSize());
     };
 
-    this.cellXToPoints = function (cellX) {
+    this.cellToPointsX = function (cellX) {
         return this.getLeftmostCellX() + cellX * this.getCellSize();
     };
 
-    this.cellYToPoints = function (cellY) {
+    this.cellToPointsY = function (cellY) {
         return (this.getTopY() - this.getCellSize() / 2) - cellY * this.getCellSize();
     };
 

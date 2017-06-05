@@ -80,19 +80,19 @@ describe("Board Dimensions", function () {
     it("should return cell coords to points", function () {
         var cellX = 0;
         var expectedPointsX = 400 + DEFAULT_CELL_SIZE / 2;
-        expect(boardDimensions.cellXToPoints(cellX)).toBe(expectedPointsX);
+        expect(boardDimensions.cellToPointsX(cellX)).toBe(expectedPointsX);
 
         cellX = 3;
         expectedPointsX = 550 + DEFAULT_CELL_SIZE / 2;
-        expect(boardDimensions.cellXToPoints(cellX)).toBe(expectedPointsX);
+        expect(boardDimensions.cellToPointsX(cellX)).toBe(expectedPointsX);
 
         var cellY = 0;
         var expectedPointsY = 485 - DEFAULT_CELL_SIZE / 2;
-        expect(boardDimensions.cellYToPoints(cellY)).toBe(expectedPointsY);
+        expect(boardDimensions.cellToPointsY(cellY)).toBe(expectedPointsY);
 
         cellY = 4;
         expectedPointsY = 285 - DEFAULT_CELL_SIZE / 2;
-        expect(boardDimensions.cellYToPoints(cellY)).toBe(expectedPointsY);
+        expect(boardDimensions.cellToPointsY(cellY)).toBe(expectedPointsY);
     });
 
     it("should respond to screen size changes", function () {
