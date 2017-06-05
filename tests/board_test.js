@@ -71,6 +71,56 @@ describe("Board", function () {
         expect(board.getGroupsInCol(3)).toEqual(expectedCol3);
     });
 
+    it("should return marked groups in row", function () {
+        var expectedRow0 = [true, true];
+        var expectedRow1 = [];
+        var expectedRow2 = [false];
+        var expectedRow3 = [true];
+        var expectedRow4 = [false, true];
+
+        board.mark(1, 0);
+        board.mark(3, 0);
+        board.mark(1, 1);
+        board.mark(2, 1);
+        board.mark(3, 1);
+        board.mark(0, 2);
+        board.mark(2, 2);
+        board.mark(3, 2);
+        board.mark(1, 3);
+        board.mark(2, 3);
+        board.mark(3, 3);
+        board.mark(2, 4);
+        board.mark(3, 4);
+
+        expect(board.getMarkedGroupsInRow(0)).toEqual(expectedRow0);
+        expect(board.getMarkedGroupsInRow(1)).toEqual(expectedRow1);
+        expect(board.getMarkedGroupsInRow(2)).toEqual(expectedRow2);
+        expect(board.getMarkedGroupsInRow(3)).toEqual(expectedRow3);
+        expect(board.getMarkedGroupsInRow(4)).toEqual(expectedRow4);
+    });
+
+    it("should return marked groups in col", function () {
+        var expectedCol0 = [true, true];
+        var expectedCol1 = [true, false];
+        var expectedCol2 = [false];
+        var expectedCol3 = [false, false];
+
+        board.mark(0, 2);
+        board.mark(0, 4);
+        board.mark(1, 0);
+        board.mark(1, 1);
+        board.mark(1, 3);
+        board.mark(1, 4);
+        board.mark(3, 1);
+        board.mark(3, 3);
+        board.mark(3, 4);
+
+        expect(board.getMarkedGroupsInCol(0)).toEqual(expectedCol0);
+        expect(board.getMarkedGroupsInCol(1)).toEqual(expectedCol1);
+        expect(board.getMarkedGroupsInCol(2)).toEqual(expectedCol2);
+        expect(board.getMarkedGroupsInCol(3)).toEqual(expectedCol3);
+    });
+
     it("should init with marked cells array", function () {
         board = new lowfat.Board(2, 2, [1, 0, 0, 1], [1, 1, 1, 0]);
         expect(board.getIsMarked(1, 0)).toBe(true);

@@ -54,6 +54,48 @@ lowfat.Board = function (cols, rows, elementsArray, marksArray) {
         return groups;
     };
 
+    this.getMarkedGroupsInRow = function (row) {
+        var groupLength = 0;
+        var groupIsMarkedCompletely = true;
+        var markedGroups = [];
+        for (var i = 0; i < width; i++) {
+            var isFilled = this.getIsFilled(i, row);
+            if (isFilled) {
+                groupLength++;
+                if (!that.getIsMarked(i, row)) {
+                    groupIsMarkedCompletely = false;
+                }
+            }
+            if ((!isFilled || i == width - 1) && groupLength > 0) {
+                markedGroups.push(groupIsMarkedCompletely);
+                groupIsMarkedCompletely = true;
+                groupLength = 0;
+            }
+        }
+        return markedGroups;
+    };
+
+    this.getMarkedGroupsInCol = function (col) {
+        var groupLength = 0;
+        var groupIsMarkedCompletely = true;
+        var markedGroups = [];
+        for (var i = 0; i < height; i++) {
+            var isFilled = this.getIsFilled(col, i);
+            if (isFilled) {
+                groupLength++;
+                if (!that.getIsMarked(col, i)) {
+                    groupIsMarkedCompletely = false;
+                }
+            }
+            if ((!isFilled || i == height - 1) && groupLength > 0) {
+                markedGroups.push(groupIsMarkedCompletely);
+                groupIsMarkedCompletely = true;
+                groupLength = 0;
+            }
+        }
+        return markedGroups;
+    };
+
     this.mark = function (x, y) {
         checkBounds(x, y);
         if (this.getIsMarked(x, y) == true) {
