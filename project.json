@@ -14,7 +14,7 @@
     "jsList" : [
         "src/resource.js",
         "src/common.js",
-        "src/gamefield_scene.js",
+        "src/game_scene.js",
         "src/gamefield.js",
         "src/board.js",
         "src/board_dimensions.js"

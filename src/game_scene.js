@@ -1,6 +1,6 @@
 var lowfat = lowfat || {};
 
-var GamefieldScene = cc.Scene.extend({
+var GameScene = cc.Scene.extend({
     gamefield: null,
 
     setup: function () {
