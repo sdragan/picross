@@ -5,7 +5,8 @@ lowfat.Gamefield = function (scene, spriteManager) {
     var container = scene;
     var board = null;
     var boardDimensions = null;
-
+    var groupLabelsRows = null;
+    var groupLabelsCols = null;
     var controls = null;
 
     var gridContainer = null;
@@ -13,6 +14,8 @@ lowfat.Gamefield = function (scene, spriteManager) {
     function initVars() {
         board = new lowfat.Board(4, 5, [0, 1, 0, 1, 0, 0, 0, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1, 1]);
         boardDimensions = new lowfat.BoardDimensions(board.getWidth(), board.getHeight(), cc.director.getWinSize());
+        groupLabelsRows = [];
+        groupLabelsCols = [];
     }
 
     function initLayers() {
@@ -41,14 +44,61 @@ lowfat.Gamefield = function (scene, spriteManager) {
         }
     }
 
+    function drawMarks() {
+        var groupsCount;
+        var groups;
+        var labelsInLine;
+        var label;
+        var i;
+
+        for (var row = 0; row < board.getHeight(); row++) {
+            groups = board.getGroupsInRow(row);
+            groupsCount = groups.length;
+            labelsInLine = [];
+            for (i = 0; i < groupsCount; i++) {
+                label = new cc.LabelBMFont(groups[i], res.hintsfont_fnt, 50, cc.TEXT_ALIGNMENT_CENTER);
+                label.setAnchorPoint(0.5, 0.5);
+                label.setPosition(boardDimensions.getLeftX() - (groupsCount - i) * 30 + 15, boardDimensions.cellToPointsY(row) + 29);
+                gridContainer.addChild(label);
+                labelsInLine.push(label);
+            }
+            groupLabelsRows[row] = labelsInLine;
+        }
+
+        for (var col = 0; col < board.getWidth(); col++) {
+            groups = board.getGroupsInCol(col);
+            groupsCount = groups.length;
+            labelsInLine = [];
+            for (i = 0; i < groupsCount; i++) {
+
+                label = new cc.LabelBMFont(groups[i], res.hintsfont_fnt, 50, cc.TEXT_ALIGNMENT_CENTER);
+                label.setAnchorPoint(0.5, 0.5);
+                label.setPosition(boardDimensions.cellToPointsX(col), boardDimensions.getTopY() + (groupsCount - i) * 30 + 16);
+                gridContainer.addChild(label);
+                labelsInLine.push(label);
+            }
+        }
+    }
+
     this.start = function () {
         initVars();
         initLayers();
         initControls();
         drawBoard();
+        drawMarks();
     };
 
+    var musicIsPlaying = false;
+    function playMusic() {
+        if (!musicIsPlaying) {
+            cc.audioEngine.playMusic("res/music.mp3", false);
+            musicIsPlaying = true;
+        }
+    }
+
     function selectCell(cellX, cellY) {
+        playMusic()
+
         if (board.getIsMarked(cellX, cellY)) {
             return;
         }
