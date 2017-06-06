@@ -17,6 +17,6 @@
         "src/game_scene.js",
         "src/gamefield.js",
         "src/board.js",
-        "src/board_dimensions.js"
+        "src/board_dimensions_new.js"
     ]
 }

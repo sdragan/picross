@@ -14,8 +14,8 @@ lowfat.Gamefield = function (scene, spriteManager) {
     function initVars() {
         // provide board and boardSizeVO from the outside
         board = new lowfat.Board(4, 5, [0, 1, 0, 1, 0, 0, 0, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1, 1]);
-        // var boardSizeVO = new lowfat.BoardSizeVO(50, 25, 30, 0, 0, 0, 2);
-        boardDimensions = new lowfat.BoardDimensions(cc.director.getWinSize(), board.getWidth(), board.getHeight(), board.getBiggestGroupsAmountInRows(), board.getBiggestGroupsAmountInCols());
+        var boardSizeVO = new lowfat.BoardSizeVO(50, 25, 30, 0, 0, 0, 1);
+        boardDimensions = new lowfat.BoardDimensions(cc.director.getWinSize(), board.getWidth(), board.getHeight(), board.getBiggestGroupsAmountInRows(), board.getBiggestGroupsAmountInCols(), boardSizeVO);
         groupLabelsRows = [];
         groupLabelsCols = [];
     }
@@ -25,6 +25,7 @@ lowfat.Gamefield = function (scene, spriteManager) {
         container.addChild(bgGradient);
         gridContainer = new cc.Node();
         container.addChild(gridContainer);
+        gridContainer.setPosition(boardDimensions.getBoardContainerLeftX(), boardDimensions.getBoardContainerBottomY());
     }
 
     function initControls() {
@@ -36,7 +37,7 @@ lowfat.Gamefield = function (scene, spriteManager) {
         for (var row = 0; row < board.getHeight(); row++) {
             for (var col = 0; col < board.getWidth(); col++) {
                 var gridCell = spriteManager.getSprite("GridCell");
-                gridCell.setPosition(boardDimensions.cellToPointsX(col), boardDimensions.cellToPointsY(row));
+                gridCell.setPosition(boardDimensions.cellToPointsXRelativeToZero(col), boardDimensions.cellToPointsYRelativeToZero(row));
                 gridContainer.addChild(gridCell);
 
                 // var cellContent = board.getIsFilled(col, row) ? spriteManager.getSprite("CellFilled") : spriteManager.getSprite("CellEmptySmall");
@@ -87,7 +88,7 @@ lowfat.Gamefield = function (scene, spriteManager) {
         initLayers();
         initControls();
         drawBoard();
-        drawMarks();
+//        drawMarks();
     };
 
     function selectCell(cellX, cellY) {

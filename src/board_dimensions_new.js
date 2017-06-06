@@ -25,6 +25,10 @@ lowfat.BoardDimensions = function (screenSizeInPoints, cols, rows, biggestGroups
 
     updateScreenSizeAndScale(screenSizeInPoints);
 
+    this.getScale = function () {
+        return scale;
+    };
+
     this.cellToPointsX = function (cellX) {
         return getBoardLeftXScaled() + getLabelsWidthScaled() + ((cellX + 0.5) * getCellSizeScaled());
     };
@@ -33,8 +37,20 @@ lowfat.BoardDimensions = function (screenSizeInPoints, cols, rows, biggestGroups
         return getBoardBottomYScaled() + (rows - cellY - 0.5) * getCellSizeScaled();
     };
 
+    this.cellToPointsXRelativeToZero = function (cellX) {
+        return getLabelsWidthUnscaled() +  (cellX + 0.5) * getCellSizeUnscaled();
+    };
+
+    this.cellToPointsYRelativeToZero = function (cellY) {
+        return (rows - cellY - 0.5) * getCellSizeUnscaled();
+    };
+
     function getBoardLeftXScaled() {
         return MARGIN_HORIZONTAL + (getContainerWidth() - getTotalWidthScaled()) / 2;
+    };
+
+    this.getBoardContainerLeftX = function () {
+        return getBoardLeftXScaled();
     };
 
     function getTotalWidthScaled() {
@@ -47,6 +63,10 @@ lowfat.BoardDimensions = function (screenSizeInPoints, cols, rows, biggestGroups
 
     function getBoardBottomYScaled() {
         return MARGIN_BOTTOM + (getContainerHeight() - getTotalHeightScaled()) / 2;
+    };
+
+    this.getBoardContainerBottomY = function () {
+        return getBoardBottomYScaled();
     };
 
     function getTotalHeightScaled() {
@@ -105,7 +125,7 @@ lowfat.BoardDimensions = function (screenSizeInPoints, cols, rows, biggestGroups
         return getCellSizeUnscaled() * rows;
     }
 
-    function getLabelsWidthUnscaled() {
+    function getLabelsHeightUnscaled() {
         return biggestGroupsAmountInCols * GROUP_LABEL_HEIGHT;
     }
 
