@@ -9,23 +9,24 @@ lowfat.Gamefield = function (scene, spriteManager) {
     var groupLabelsCols = null;
     var controls = null;
 
+    var bgGradient = null;
     var gridContainer = null;
 
     function initVars() {
-        // provide board and boardSizeVO from the outside
         board = new lowfat.Board(4, 5, [0, 1, 0, 1, 0, 0, 0, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1, 1]);
-        var boardSizeVO = new lowfat.BoardSizeVO(50, 25, 30, 0, 0, 0, 1);
+        var boardSizeVO = new lowfat.BoardSizeVO(50, 25, 30, 0, 100, 0, 3);
         boardDimensions = new lowfat.BoardDimensions(cc.director.getWinSize(), board.getWidth(), board.getHeight(), board.getBiggestGroupsAmountInRows(), board.getBiggestGroupsAmountInCols(), boardSizeVO);
         groupLabelsRows = [];
         groupLabelsCols = [];
     }
 
     function initLayers() {
-        var bgGradient = new cc.LayerGradient(cc.color(161, 224, 229), cc.color(76, 161, 175));
+        bgGradient = new cc.LayerGradient(cc.color(161, 224, 229), cc.color(76, 161, 175));
         container.addChild(bgGradient);
         gridContainer = new cc.Node();
         container.addChild(gridContainer);
-        gridContainer.setPosition(boardDimensions.getBoardContainerLeftX(), boardDimensions.getBoardContainerBottomY());
+        gridContainer.setPosition(boardDimensions.getContainerLeftX(), boardDimensions.getContainerBottomY());
+        gridContainer.setScale(boardDimensions.getScale(), boardDimensions.getScale());
     }
 
     function initControls() {
@@ -37,16 +38,17 @@ lowfat.Gamefield = function (scene, spriteManager) {
         for (var row = 0; row < board.getHeight(); row++) {
             for (var col = 0; col < board.getWidth(); col++) {
                 var gridCell = spriteManager.getSprite("GridCell");
-                gridCell.setPosition(boardDimensions.cellToPointsXRelativeToZero(col), boardDimensions.cellToPointsYRelativeToZero(row));
+                gridCell.setPosition(boardDimensions.cellToPointsXLocal(col), boardDimensions.cellToPointsYLocal(row));
                 gridContainer.addChild(gridCell);
 
                 // var cellContent = board.getIsFilled(col, row) ? spriteManager.getSprite("CellFilled") : spriteManager.getSprite("CellEmptySmall");
-                // cellContent.setPosition(boardDimensions.cellToPointsX(col), boardDimensions.cellToPointsY(row));
+                // cellContent.setPosition(boardDimensions.cellToPointsXLocal(col), boardDimensions.cellToPointsYLocal(row));
                 // gridContainer.addChild(cellContent);
             }
         }
     }
 
+    // todo: fix this, get label coords from BoardDimensions
     function drawMarks() {
         var groupsCount;
         var groups;
@@ -61,7 +63,7 @@ lowfat.Gamefield = function (scene, spriteManager) {
             for (i = 0; i < groupsCount; i++) {
                 label = new cc.LabelBMFont(groups[i], res.hintsfont_fnt, 50, cc.TEXT_ALIGNMENT_CENTER);
                 label.setAnchorPoint(0.5, 0.5);
-                label.setPosition(boardDimensions.getLeftX() - (groupsCount - i) * 30 + 15, boardDimensions.cellToPointsY(row) + 29);
+                label.setPosition(boardDimensions.getLeftX() - (groupsCount - i) * 30 + 15, boardDimensions.cellToPointsYLocal(row) + 29);
                 gridContainer.addChild(label);
                 labelsInLine.push(label);
             }
@@ -76,7 +78,7 @@ lowfat.Gamefield = function (scene, spriteManager) {
 
                 label = new cc.LabelBMFont(groups[i], res.hintsfont_fnt, 50, cc.TEXT_ALIGNMENT_CENTER);
                 label.setAnchorPoint(0.5, 0.5);
-                label.setPosition(boardDimensions.cellToPointsX(col), boardDimensions.getTopY() + (groupsCount - i) * 30 + 16);
+                label.setPosition(boardDimensions.cellToPointsXLocal(col), boardDimensions.getTopY() + (groupsCount - i) * 30 + 16);
                 gridContainer.addChild(label);
                 labelsInLine.push(label);
             }
@@ -88,7 +90,7 @@ lowfat.Gamefield = function (scene, spriteManager) {
         initLayers();
         initControls();
         drawBoard();
-//        drawMarks();
+        // drawMarks();
     };
 
     function selectCell(cellX, cellY) {
@@ -111,7 +113,7 @@ lowfat.Gamefield = function (scene, spriteManager) {
 
     function revealFilledCell(cellX, cellY) {
         var cellContent = spriteManager.getSprite("CellFilled");
-        cellContent.setPosition(boardDimensions.cellToPointsX(cellX), boardDimensions.cellToPointsY(cellY));
+        cellContent.setPosition(boardDimensions.cellToPointsXLocal(cellX), boardDimensions.cellToPointsYLocal(cellY));
         gridContainer.addChild(cellContent);
 
         var upScaleAction = new cc.ScaleTo(0.1, 1.1, 1.1).easing(cc.easeCubicActionOut());
@@ -123,7 +125,7 @@ lowfat.Gamefield = function (scene, spriteManager) {
 
     function revealMistake(cellX, cellY) {
         var cellContent = spriteManager.getSprite("CellMistake");
-        cellContent.setPosition(boardDimensions.cellToPointsX(cellX), boardDimensions.cellToPointsY(cellY));
+        cellContent.setPosition(boardDimensions.cellToPointsXLocal(cellX), boardDimensions.cellToPointsYLocal(cellY));
         gridContainer.addChild(cellContent);
 
         var upScaleAction = new cc.ScaleTo(0.1, 1.1, 1.1).easing(cc.easeCubicActionOut());
@@ -135,6 +137,7 @@ lowfat.Gamefield = function (scene, spriteManager) {
 
     this.onResize = function (screenSizeInPoints) {
         boardDimensions.resize(screenSizeInPoints);
+        bgGradient.setContentSize(screenSizeInPoints.width, screenSizeInPoints.height);
     }
 };
 
@@ -171,7 +174,7 @@ lowfat.TouchControls = function (scene, boardDimensions, selectCellCallback) {
     };
 
     function processTouchStarted(touchX, touchY) {
-        if (!checkInsideBoard(touchX, touchY)) {
+        if (!boardDimensions.getIsInsideBoard(touchX, touchY)) {
             return;
         }
 
@@ -180,7 +183,7 @@ lowfat.TouchControls = function (scene, boardDimensions, selectCellCallback) {
     }
 
     function processTouchUpdated(touchX, touchY, delta) {
-        if (!touchStarted || !checkInsideBoard(touchX, touchY)) {
+        if (!touchStarted || !boardDimensions.getIsInsideBoard(touchX, touchY)) {
             return;
         }
 
@@ -193,9 +196,5 @@ lowfat.TouchControls = function (scene, boardDimensions, selectCellCallback) {
         }
 
         touchStarted = false;
-    }
-
-    function checkInsideBoard(touchX, touchY) {
-        return touchX > boardDimensions.getLeftX() && touchX < boardDimensions.getRightX() && touchY > boardDimensions.getBottomY() && touchY < boardDimensions.getTopY();
     }
 };

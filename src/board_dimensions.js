@@ -1,65 +1,167 @@
 var lowfat = lowfat || {};
 
-lowfat.BoardDimensions = function (screenSizeInPoints, cols, rows, biggestGroupsAmountInRows, biggestGroupsAmountInCols) {
-    var screenWidthInPoints = screenSizeInPoints.width;
-    var screenHeightInPoints = screenSizeInPoints.height;
+lowfat.BoardSizeVO = function (cellSize, groupLabelWidth, groupLabelHeight, marginTop, marginBottom, marginHorizontal, maxScale) {
+    this.cellSize = cellSize;
+    this.groupLabelWidth = groupLabelWidth;
+    this.groupLabelHeight = groupLabelHeight;
+    this.marginTop = marginTop;
+    this.marginBottom = marginBottom;
+    this.marginHorizontal = marginHorizontal;
+    this.maxScale = maxScale;
+};
 
-    var DEFAULT_CELL_SIZE = 50;
+lowfat.BoardDimensions = function (screenSizeInPoints, cols, rows, biggestGroupsAmountInRows, biggestGroupsAmountInCols, boardSizeVO) {
+    var screenWidthInPoints;
+    var screenHeightInPoints;
+    var scale;
 
-    this.getCellSize = function () {
-        return DEFAULT_CELL_SIZE;
+    var DEFAULT_CELL_SIZE = boardSizeVO.cellSize;
+    var GROUP_LABEL_WIDTH = boardSizeVO.groupLabelWidth;
+    var GROUP_LABEL_HEIGHT = boardSizeVO.groupLabelHeight;
+    var MARGIN_TOP = boardSizeVO.marginTop;
+    var MARGIN_BOTTOM = boardSizeVO.marginBottom;
+    var MARGIN_HORIZONTAL = boardSizeVO.marginHorizontal;
+    var MAX_SCALE = boardSizeVO.maxScale;
+
+    updateScreenSizeAndScale(screenSizeInPoints);
+
+    this.getScale = function () {
+        return scale;
     };
 
-    this.getWidth = function () {
-        return this.getCellSize() * cols;
+    this.cellToPointsXLocal = function (cellX) {
+        return getLabelsWidthUnscaled() + (cellX + 0.5) * getCellSizeUnscaled();
     };
 
-    this.getHeight = function () {
-        return this.getCellSize() * rows;
+    this.cellToPointsYLocal = function (cellY) {
+        return (rows - cellY - 0.5) * getCellSizeUnscaled();
     };
 
-    this.getLeftX = function () {
-        return (screenWidthInPoints - (this.getCellSize() * cols)) / 2;
+    this.cellToPointsXGlobal = function (cellX) {
+        return getBoardLeftXScaled() + ((cellX + 0.5) * getCellSizeScaled());
     };
 
-    this.getLeftmostCellX = function () {
-        return this.getLeftX() + this.getCellSize() / 2;
-    };
-
-    this.getBottomY = function () {
-        return (screenHeightInPoints - (this.getCellSize() * rows)) / 2;
-    };
-
-    this.getBottommostCellY = function () {
-        return this.getBottomY() + this.getCellSize() / 2;
-    };
-
-    this.getRightX = function () {
-        return this.getLeftX() + this.getWidth();
-    };
-
-    this.getTopY = function () {
-        return this.getBottomY() + this.getHeight();
+    this.cellToPointsYGlobal = function (cellY) {
+        return getBoardBottomYScaled() + (rows - cellY - 0.5) * getCellSizeScaled();
     };
 
     this.pointsToCellX = function (pointsX) {
-        return Math.floor((pointsX - this.getLeftX()) / this.getCellSize());
+        return Math.floor((pointsX - getBoardLeftXScaled()) / getCellSizeScaled())
     };
 
     this.pointsToCellY = function (pointsY) {
-        return rows - Math.ceil((pointsY - this.getBottomY()) / this.getCellSize());
+        return rows - Math.ceil((pointsY - getBoardBottomYScaled()) / getCellSizeScaled());
     };
 
-    this.cellToPointsX = function (cellX) {
-        return this.getLeftmostCellX() + cellX * this.getCellSize();
+    this.getContainerLeftX = function () {
+        return getTotalLeftXScaled();
     };
 
-    this.cellToPointsY = function (cellY) {
-        return (this.getTopY() - this.getCellSize() / 2) - cellY * this.getCellSize();
+    this.getContainerBottomY = function () {
+        return getBoardBottomYScaled();
+    };
+
+    this.getIsInsideBoard = function (pointsX, pointsY) {
+        return pointsX > getBoardLeftXScaled() && pointsX < getBoardRightXScaled() && pointsY > getBoardBottomYScaled() && pointsY < getBoardTopYScaled();
     };
 
     this.resize = function (screenSizeInPoints) {
+        updateScreenSizeAndScale(screenSizeInPoints);
+    };
+
+    function getBoardHeightScaled() {
+        return getBoardHeightUnscaled() * scale;
+    }
+
+    function getLabelsWidthScaled() {
+        return getLabelsWidthUnscaled() * scale;
+    }
+
+    function getTotalLeftXScaled() {
+        return MARGIN_HORIZONTAL + (getContainerWidth() - getTotalWidthScaled()) / 2;
+    }
+
+    function getTotalWidthScaled() {
+        return getTotalWidthUnscaled() * scale;
+    }
+
+    function getTotalHeightScaled() {
+        return getTotalHeightUnscaled() * scale;
+    }
+
+    function getBoardLeftXScaled() {
+        return getTotalLeftXScaled() + getLabelsWidthScaled();
+    }
+
+    function getBoardRightXScaled() {
+        return getTotalLeftXScaled() + getTotalWidthScaled();
+    }
+
+    function getBoardBottomYScaled() {
+        return MARGIN_BOTTOM + (getContainerHeight() - getTotalHeightScaled()) / 2;
+    }
+
+    function getBoardTopYScaled() {
+        return getBoardBottomYScaled() + getBoardHeightScaled();
+    }
+
+    function updateScreenSizeAndScale(screenSizeInPoints) {
         screenWidthInPoints = screenSizeInPoints.width;
         screenHeightInPoints = screenSizeInPoints.height;
-    };
+        scale = getBiggestPossibleScale();
+    }
+
+    function getBiggestPossibleScale() {
+        var cW = getContainerWidth();
+        var cH = getContainerHeight();
+        var w = getTotalWidthUnscaled();
+        var h = getTotalHeightUnscaled();
+        var dW = cW / w;
+        var dH = cH / h;
+        var resultScale = dW < dH ? dW : dH;
+        if (resultScale > MAX_SCALE) {
+            resultScale = MAX_SCALE;
+        }
+        return resultScale;
+    }
+
+    function getContainerWidth() {
+        return screenWidthInPoints - MARGIN_HORIZONTAL * 2;
+    }
+
+    function getContainerHeight() {
+        return screenHeightInPoints - MARGIN_TOP - MARGIN_BOTTOM;
+    }
+
+    function getTotalWidthUnscaled() {
+        return getBoardWidthUnscaled() + getLabelsWidthUnscaled();
+    }
+
+    function getBoardWidthUnscaled() {
+        return getCellSizeUnscaled() * cols;
+    }
+
+    function getTotalHeightUnscaled() {
+        return getBoardHeightUnscaled() + getLabelsHeightUnscaled();
+    }
+
+    function getBoardHeightUnscaled() {
+        return getCellSizeUnscaled() * rows;
+    }
+
+    function getLabelsWidthUnscaled() {
+        return biggestGroupsAmountInRows * GROUP_LABEL_WIDTH;
+    }
+
+    function getLabelsHeightUnscaled() {
+        return biggestGroupsAmountInCols * GROUP_LABEL_HEIGHT;
+    }
+
+    function getCellSizeUnscaled() {
+        return DEFAULT_CELL_SIZE;
+    }
+
+    function getCellSizeScaled() {
+        return getCellSizeUnscaled() * scale;
+    }
 };
