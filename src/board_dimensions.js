@@ -1,6 +1,6 @@
 var lowfat = lowfat || {};
 
-lowfat.BoardDimensions = function (cols, rows, screenSizeInPoints) {
+lowfat.BoardDimensions = function (screenSizeInPoints, cols, rows, biggestGroupsAmountInRows, biggestGroupsAmountInCols) {
     var screenWidthInPoints = screenSizeInPoints.width;
     var screenHeightInPoints = screenSizeInPoints.height;
 

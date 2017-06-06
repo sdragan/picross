@@ -12,8 +12,10 @@ lowfat.Gamefield = function (scene, spriteManager) {
     var gridContainer = null;
 
     function initVars() {
+        // provide board and boardSizeVO from the outside
         board = new lowfat.Board(4, 5, [0, 1, 0, 1, 0, 0, 0, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1, 1]);
-        boardDimensions = new lowfat.BoardDimensions(board.getWidth(), board.getHeight(), cc.director.getWinSize());
+        // var boardSizeVO = new lowfat.BoardSizeVO(50, 25, 30, 0, 0, 0, 2);
+        boardDimensions = new lowfat.BoardDimensions(cc.director.getWinSize(), board.getWidth(), board.getHeight(), board.getBiggestGroupsAmountInRows(), board.getBiggestGroupsAmountInCols());
         groupLabelsRows = [];
         groupLabelsCols = [];
     }
@@ -88,18 +90,11 @@ lowfat.Gamefield = function (scene, spriteManager) {
         drawMarks();
     };
 
-    var musicIsPlaying = false;
-    function playMusic() {
-        if (!musicIsPlaying) {
-            cc.audioEngine.playMusic("res/music.mp3", false);
-            musicIsPlaying = true;
-        }
-    }
-
     function selectCell(cellX, cellY) {
-        playMusic()
-
         if (board.getIsMarked(cellX, cellY)) {
+            if (!board.getIsFilled(cellX, cellY)) {
+                controls.forceStopDrag();
+            }
             return;
         }
 

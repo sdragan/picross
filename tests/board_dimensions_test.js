@@ -10,9 +10,9 @@ describe("Board Dimensions", function () {
     var SCREEN_PRESET_HEIGHT_IN_POINTS_2 = 360;
 
     beforeEach(function () {
-        boardDimensions = new lowfat.BoardDimensions(BOARD_PRESET_WIDTH, BOARD_PRESET_HEIGHT, {
+        boardDimensions = new lowfat.BoardDimensions({
             width: SCREEN_PRESET_WIDTH_IN_POINTS, height: SCREEN_PRESET_HEIGHT_IN_POINTS
-        });
+        }, BOARD_PRESET_WIDTH, BOARD_PRESET_HEIGHT, 2, 2);
     });
 
     it("should return cell size", function () {
