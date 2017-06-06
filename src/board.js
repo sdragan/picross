@@ -96,6 +96,28 @@ lowfat.Board = function (cols, rows, elementsArray, marksArray) {
         return markedGroups;
     };
 
+    this.getBiggestGroupsAmountInRows = function () {
+        var result = 0;
+        for (var row = 0; row < height; row++) {
+            var groupsInRow = this.getGroupsInRow(row).length;
+            if (result < groupsInRow) {
+                result = groupsInRow;
+            }
+        }
+        return result;
+    };
+
+    this.getBiggestGroupsAmountInCols = function () {
+            var result = 0;
+            for (var col = 0; col < width; col++) {
+                var groupsInCol = this.getGroupsInCol(col).length;
+                if (result < groupsInCol) {
+                    result = groupsInCol;
+                }
+            }
+            return result;
+        };
+
     this.mark = function (x, y) {
         checkBounds(x, y);
         if (this.getIsMarked(x, y) == true) {

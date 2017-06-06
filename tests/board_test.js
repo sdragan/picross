@@ -121,6 +121,16 @@ describe("Board", function () {
         expect(board.getMarkedGroupsInCol(3)).toEqual(expectedCol3);
     });
 
+    it("should find and return longest group among rows", function () {
+        var expectedResult = 2;
+        expect(board.getBiggestGroupsAmountInRows()).toEqual(expectedResult);
+    });
+
+    it("should find and return longest group among cols", function () {
+            var expectedResult = 2;
+            expect(board.getBiggestGroupsAmountInCols()).toEqual(expectedResult);
+        });
+
     it("should init with marked cells array", function () {
         board = new lowfat.Board(2, 2, [1, 0, 0, 1], [1, 1, 1, 0]);
         expect(board.getIsMarked(1, 0)).toBe(true);
