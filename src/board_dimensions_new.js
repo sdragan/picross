@@ -15,25 +15,43 @@ lowfat.BoardDimensions = function (screenSizeInPoints, cols, rows, biggestGroups
     var screenHeightInPoints;
     var scale;
 
-    var DEFAULT_CELL_SIZE = 50;
-    var GROUP_LABEL_WIDTH = 25;
-    var GROUP_LABEL_HEIGHT = 30;
-    var MARGIN_TOP = 0;
-    var MARGIN_BOTTOM = 0;
-    var MARGIN_HORIZONTAL = 0;
-    var MAX_SCALE = 2;
+    var DEFAULT_CELL_SIZE = boardSizeVO.cellSize;
+    var GROUP_LABEL_WIDTH = boardSizeVO.groupLabelWidth;
+    var GROUP_LABEL_HEIGHT = boardSizeVO.groupLabelHeight;
+    var MARGIN_TOP = boardSizeVO.marginTop;
+    var MARGIN_BOTTOM = boardSizeVO.marginBottom;
+    var MARGIN_HORIZONTAL = boardSizeVO.marginHorizontal;
+    var MAX_SCALE = boardSizeVO.maxScale;
 
     updateScreenSizeAndScale(screenSizeInPoints);
 
-    this.cellToPointsX = function () {
-
+    this.cellToPointsX = function (cellX) {
+        return getBoardLeftXScaled() + getLabelsWidthScaled() + ((cellX + 0.5) * getCellSizeScaled());
     };
 
-    this.cellToPointsY = function() {
-
+    this.cellToPointsY = function(cellY) {
+        return getBoardBottomYScaled() + (rows - cellY - 0.5) * getCellSizeScaled();
     };
 
+    function getBoardLeftXScaled() {
+        return MARGIN_HORIZONTAL + (getContainerWidth() - getTotalWidthScaled()) / 2;
+    };
 
+    function getTotalWidthScaled() {
+        return getTotalWidthUnscaled() * scale;
+    };
+
+    function getLabelsWidthScaled() {
+        return getLabelsWidthUnscaled() * scale;
+    };
+
+    function getBoardBottomYScaled() {
+        return MARGIN_BOTTOM + (getContainerHeight() - getTotalHeightScaled()) / 2;
+    };
+
+    function getTotalHeightScaled() {
+        return getTotalHeightUnscaled() * scale;
+    };
 
     this.resize = function (screenSizeInPoints) {
         updateScreenSizeAndScale(screenSizeInPoints);
@@ -48,8 +66,8 @@ lowfat.BoardDimensions = function (screenSizeInPoints, cols, rows, biggestGroups
     function getBiggestPossibleScale() {
         var cW = getContainerWidth();
         var cH = getContainerHeight();
-        var w = this.getTotalWidthUnscaled();
-        var h = this.getTotalHeightUnscaled();
+        var w = getTotalWidthUnscaled();
+        var h = getTotalHeightUnscaled();
         var dW = cW / w;
         var dH = cH / h;
         var resultScale = dW < dH ? dW : dH;
@@ -93,5 +111,9 @@ lowfat.BoardDimensions = function (screenSizeInPoints, cols, rows, biggestGroups
 
     function getCellSizeUnscaled() {
         return DEFAULT_CELL_SIZE;
+    }
+
+    function getCellSizeScaled() {
+        return getCellSizeUnscaled() * scale;
     }
 };
