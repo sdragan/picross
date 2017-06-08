@@ -1,6 +1,6 @@
 var lowfat = lowfat || {};
 
-lowfat.Gamefield = function (scene, spriteManager) {
+lowfat.Gamefield = function (scene, spriteFactory) {
     var that = this;
     var container = scene;
     var board = null;
@@ -14,7 +14,7 @@ lowfat.Gamefield = function (scene, spriteManager) {
 
     function initVars() {
         board = new lowfat.Board(4, 5, [0, 1, 0, 1, 0, 0, 0, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1, 1]);
-        var boardSizeVO = new lowfat.BoardSizeVO(50, 25, 30, 0, 100, 0, 3);
+        var boardSizeVO = new lowfat.BoardSizeVO(50, 14, 18, 2, 2, 0, 0, 0, 1.5);
         boardDimensions = new lowfat.BoardDimensions(cc.director.getWinSize(), board.getWidth(), board.getHeight(), board.getBiggestGroupsAmountInRows(), board.getBiggestGroupsAmountInCols(), boardSizeVO);
         groupLabelsRows = [];
         groupLabelsCols = [];
@@ -37,18 +37,17 @@ lowfat.Gamefield = function (scene, spriteManager) {
     function drawBoard() {
         for (var row = 0; row < board.getHeight(); row++) {
             for (var col = 0; col < board.getWidth(); col++) {
-                var gridCell = spriteManager.getSprite("GridCell");
+                var gridCell = spriteFactory.getSprite("GridCell");
                 gridCell.setPosition(boardDimensions.cellToPointsXLocal(col), boardDimensions.cellToPointsYLocal(row));
                 gridContainer.addChild(gridCell);
 
-                // var cellContent = board.getIsFilled(col, row) ? spriteManager.getSprite("CellFilled") : spriteManager.getSprite("CellEmptySmall");
+                // var cellContent = board.getIsFilled(col, row) ? spriteFactory.getSprite("CellFilled") : spriteFactory.getSprite("CellEmptySmall");
                 // cellContent.setPosition(boardDimensions.cellToPointsXLocal(col), boardDimensions.cellToPointsYLocal(row));
                 // gridContainer.addChild(cellContent);
             }
         }
     }
 
-    // todo: fix this, get label coords from BoardDimensions
     function drawMarks() {
         var groupsCount;
         var groups;
@@ -61,9 +60,8 @@ lowfat.Gamefield = function (scene, spriteManager) {
             groupsCount = groups.length;
             labelsInLine = [];
             for (i = 0; i < groupsCount; i++) {
-                label = new cc.LabelBMFont(groups[i], res.hintsfont_fnt, 50, cc.TEXT_ALIGNMENT_CENTER);
-                label.setAnchorPoint(0.5, 0.5);
-                label.setPosition(boardDimensions.getLeftX() - (groupsCount - i) * 30 + 15, boardDimensions.cellToPointsYLocal(row) + 29);
+                label = spriteFactory.getSprite("GroupLabel" + groups[i]);
+                label.setPosition(boardDimensions.labelRowToPointsXLocal(i, groupsCount), boardDimensions.labelRowToPointsYLocal(row));
                 gridContainer.addChild(label);
                 labelsInLine.push(label);
             }
@@ -75,13 +73,12 @@ lowfat.Gamefield = function (scene, spriteManager) {
             groupsCount = groups.length;
             labelsInLine = [];
             for (i = 0; i < groupsCount; i++) {
-
-                label = new cc.LabelBMFont(groups[i], res.hintsfont_fnt, 50, cc.TEXT_ALIGNMENT_CENTER);
-                label.setAnchorPoint(0.5, 0.5);
-                label.setPosition(boardDimensions.cellToPointsXLocal(col), boardDimensions.getTopY() + (groupsCount - i) * 30 + 16);
+                label = spriteFactory.getSprite("GroupLabel" + groups[i]);
+                label.setPosition(boardDimensions.labelColToPointsXLocal(col), boardDimensions.labelColToPointsYLocal(i, groupsCount));
                 gridContainer.addChild(label);
                 labelsInLine.push(label);
             }
+            groupLabelsCols[col] = labelsInLine;
         }
     }
 
@@ -90,7 +87,7 @@ lowfat.Gamefield = function (scene, spriteManager) {
         initLayers();
         initControls();
         drawBoard();
-        // drawMarks();
+        drawMarks();
     };
 
     function selectCell(cellX, cellY) {
@@ -118,7 +115,7 @@ lowfat.Gamefield = function (scene, spriteManager) {
     }
 
     function revealFilledCell(cellX, cellY) {
-        var cellContent = spriteManager.getSprite("CellFilled");
+        var cellContent = spriteFactory.getSprite("CellFilled");
         cellContent.setPosition(boardDimensions.cellToPointsXLocal(cellX), boardDimensions.cellToPointsYLocal(cellY));
         gridContainer.addChild(cellContent);
 
@@ -130,7 +127,7 @@ lowfat.Gamefield = function (scene, spriteManager) {
     }
 
     function revealMistake(cellX, cellY) {
-        var cellContent = spriteManager.getSprite("CellMistake");
+        var cellContent = spriteFactory.getSprite("CellMistake");
         cellContent.setPosition(boardDimensions.cellToPointsXLocal(cellX), boardDimensions.cellToPointsYLocal(cellY));
         gridContainer.addChild(cellContent);
 
@@ -142,7 +139,7 @@ lowfat.Gamefield = function (scene, spriteManager) {
     }
 
     function revealEmptyCell(cellX, cellY, delay) {
-        var cellContent = spriteManager.getSprite("CellEmptySmall");
+        var cellContent = spriteFactory.getSprite("CellEmptySmall");
         cellContent.setPosition(boardDimensions.cellToPointsXLocal(cellX), boardDimensions.cellToPointsYLocal(cellY));
         gridContainer.addChild(cellContent);
         cellContent.setScale(0, 0);

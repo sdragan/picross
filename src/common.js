@@ -32,7 +32,7 @@ lowfat.GraphicUtils = {
     }
 };
 
-lowfat.SpriteManager = {
+lowfat.SpriteFactory = {
     getSprite: function (spriteName, anchorPointX, anchorPointY) {
         var sprite = new cc.Sprite(this.getFrame(spriteName));
         if (typeof anchorPointX != "undefined" && typeof anchorPointY != "undefined") {

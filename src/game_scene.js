@@ -4,7 +4,7 @@ var GameScene = cc.Scene.extend({
     gamefield: null,
 
     setup: function () {
-        this.gamefield = new lowfat.Gamefield(this, lowfat.SpriteManager);
+        this.gamefield = new lowfat.Gamefield(this, lowfat.SpriteFactory);
         this.gamefield.start();
     },
 

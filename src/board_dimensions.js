@@ -1,9 +1,11 @@
 var lowfat = lowfat || {};
 
-lowfat.BoardSizeVO = function (cellSize, groupLabelWidth, groupLabelHeight, marginTop, marginBottom, marginHorizontal, maxScale) {
+lowfat.BoardSizeVO = function (cellSize, groupLabelWidth, groupLabelHeight, groupLabelsMarginX, groupLabelsMarginY, marginTop, marginBottom, marginHorizontal, maxScale) {
     this.cellSize = cellSize;
     this.groupLabelWidth = groupLabelWidth;
     this.groupLabelHeight = groupLabelHeight;
+    this.groupLabelsMarginX = groupLabelsMarginX;
+    this.groupLabelsMarginY = groupLabelsMarginY;
     this.marginTop = marginTop;
     this.marginBottom = marginBottom;
     this.marginHorizontal = marginHorizontal;
@@ -11,6 +13,7 @@ lowfat.BoardSizeVO = function (cellSize, groupLabelWidth, groupLabelHeight, marg
 };
 
 lowfat.BoardDimensions = function (screenSizeInPoints, cols, rows, biggestGroupsAmountInRows, biggestGroupsAmountInCols, boardSizeVO) {
+    var that = this;
     var screenWidthInPoints;
     var screenHeightInPoints;
     var scale;
@@ -18,6 +21,8 @@ lowfat.BoardDimensions = function (screenSizeInPoints, cols, rows, biggestGroups
     var DEFAULT_CELL_SIZE = boardSizeVO.cellSize;
     var GROUP_LABEL_WIDTH = boardSizeVO.groupLabelWidth;
     var GROUP_LABEL_HEIGHT = boardSizeVO.groupLabelHeight;
+    var GROUP_LABELS_MARGIN_X = boardSizeVO.groupLabelsMarginX;
+    var GROUP_LABELS_MARGIN_Y = boardSizeVO.groupLabelsMarginY;
     var MARGIN_TOP = boardSizeVO.marginTop;
     var MARGIN_BOTTOM = boardSizeVO.marginBottom;
     var MARGIN_HORIZONTAL = boardSizeVO.marginHorizontal;
@@ -51,6 +56,22 @@ lowfat.BoardDimensions = function (screenSizeInPoints, cols, rows, biggestGroups
 
     this.pointsToCellY = function (pointsY) {
         return rows - Math.ceil((pointsY - getBoardBottomYScaled()) / getCellSizeScaled());
+    };
+
+    this.labelRowToPointsXLocal = function (labelIndex, labelsInRow) {
+        return ((biggestGroupsAmountInRows - labelsInRow) + labelIndex + 0.5) * GROUP_LABEL_WIDTH;
+    };
+
+    this.labelRowToPointsYLocal = function (row) {
+        return that.cellToPointsYLocal(row);
+    };
+
+    this.labelColToPointsXLocal = function (col) {
+        return that.cellToPointsXLocal(col);
+    };
+
+    this.labelColToPointsYLocal = function (labelIndex, labelsInCol) {
+        return getBoardHeightUnscaled() + GROUP_LABELS_MARGIN_Y + (labelsInCol - labelIndex - 0.5) * GROUP_LABEL_HEIGHT;
     };
 
     this.getContainerLeftX = function () {
@@ -150,11 +171,11 @@ lowfat.BoardDimensions = function (screenSizeInPoints, cols, rows, biggestGroups
     }
 
     function getLabelsWidthUnscaled() {
-        return biggestGroupsAmountInRows * GROUP_LABEL_WIDTH;
+        return biggestGroupsAmountInRows * GROUP_LABEL_WIDTH + GROUP_LABELS_MARGIN_X;
     }
 
     function getLabelsHeightUnscaled() {
-        return biggestGroupsAmountInCols * GROUP_LABEL_HEIGHT;
+        return biggestGroupsAmountInCols * GROUP_LABEL_HEIGHT + GROUP_LABELS_MARGIN_Y;
     }
 
     function getCellSizeUnscaled() {

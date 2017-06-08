@@ -19,7 +19,7 @@
 				<key>spriteTrimmed</key>
 				<false/>
 				<key>textureRect</key>
-				<string>{{2,106},{50,50}}</string>
+				<string>{{2,54},{50,50}}</string>
 				<key>textureRotated</key>
 				<false/>
 			</dict>
@@ -38,7 +38,7 @@
 				<key>spriteTrimmed</key>
 				<false/>
 				<key>textureRect</key>
-				<string>{{2,54},{50,50}}</string>
+				<string>{{54,2},{50,50}}</string>
 				<key>textureRotated</key>
 				<false/>
 			</dict>
@@ -57,7 +57,7 @@
 				<key>spriteTrimmed</key>
 				<false/>
 				<key>textureRect</key>
-				<string>{{54,2},{50,50}}</string>
+				<string>{{2,2},{50,50}}</string>
 				<key>textureRotated</key>
 				<false/>
 			</dict>
@@ -76,7 +76,7 @@
 				<key>spriteTrimmed</key>
 				<false/>
 				<key>textureRect</key>
-				<string>{{54,54},{50,50}}</string>
+				<string>{{2,106},{50,50}}</string>
 				<key>textureRotated</key>
 				<false/>
 			</dict>
@@ -95,7 +95,140 @@
 				<key>spriteTrimmed</key>
 				<false/>
 				<key>textureRect</key>
-				<string>{{2,2},{50,50}}</string>
+				<string>{{54,54},{50,50}}</string>
+				<key>textureRotated</key>
+				<false/>
+			</dict>
+			<key>GroupLabel10000</key>
+			<dict>
+				<key>aliases</key>
+				<array/>
+				<key>sourceColorRect</key>
+				<string>{{0,0},{32,32}}</string>
+				<key>spriteOffset</key>
+				<string>{0,0}</string>
+				<key>spriteSize</key>
+				<string>{32,32}</string>
+				<key>spriteSourceSize</key>
+				<string>{32,32}</string>
+				<key>spriteTrimmed</key>
+				<false/>
+				<key>textureRect</key>
+				<string>{{54,106},{32,32}}</string>
+				<key>textureRotated</key>
+				<false/>
+			</dict>
+			<key>GroupLabel20000</key>
+			<dict>
+				<key>aliases</key>
+				<array/>
+				<key>sourceColorRect</key>
+				<string>{{0,0},{32,32}}</string>
+				<key>spriteOffset</key>
+				<string>{0,0}</string>
+				<key>spriteSize</key>
+				<string>{32,32}</string>
+				<key>spriteSourceSize</key>
+				<string>{32,32}</string>
+				<key>spriteTrimmed</key>
+				<false/>
+				<key>textureRect</key>
+				<string>{{88,106},{32,32}}</string>
+				<key>textureRotated</key>
+				<false/>
+			</dict>
+			<key>GroupLabel30000</key>
+			<dict>
+				<key>aliases</key>
+				<array/>
+				<key>sourceColorRect</key>
+				<string>{{0,0},{32,32}}</string>
+				<key>spriteOffset</key>
+				<string>{0,0}</string>
+				<key>spriteSize</key>
+				<string>{32,32}</string>
+				<key>spriteSourceSize</key>
+				<string>{32,32}</string>
+				<key>spriteTrimmed</key>
+				<false/>
+				<key>textureRect</key>
+				<string>{{36,174},{32,32}}</string>
+				<key>textureRotated</key>
+				<false/>
+			</dict>
+			<key>GroupLabel40000</key>
+			<dict>
+				<key>aliases</key>
+				<array/>
+				<key>sourceColorRect</key>
+				<string>{{0,0},{32,32}}</string>
+				<key>spriteOffset</key>
+				<string>{0,0}</string>
+				<key>spriteSize</key>
+				<string>{32,32}</string>
+				<key>spriteSourceSize</key>
+				<string>{32,32}</string>
+				<key>spriteTrimmed</key>
+				<false/>
+				<key>textureRect</key>
+				<string>{{88,140},{32,32}}</string>
+				<key>textureRotated</key>
+				<false/>
+			</dict>
+			<key>GroupLabel50000</key>
+			<dict>
+				<key>aliases</key>
+				<array/>
+				<key>sourceColorRect</key>
+				<string>{{0,0},{32,32}}</string>
+				<key>spriteOffset</key>
+				<string>{0,0}</string>
+				<key>spriteSize</key>
+				<string>{32,32}</string>
+				<key>spriteSourceSize</key>
+				<string>{32,32}</string>
+				<key>spriteTrimmed</key>
+				<false/>
+				<key>textureRect</key>
+				<string>{{54,140},{32,32}}</string>
+				<key>textureRotated</key>
+				<false/>
+			</dict>
+			<key>GroupLabel60000</key>
+			<dict>
+				<key>aliases</key>
+				<array/>
+				<key>sourceColorRect</key>
+				<string>{{0,0},{32,32}}</string>
+				<key>spriteOffset</key>
+				<string>{0,0}</string>
+				<key>spriteSize</key>
+				<string>{32,32}</string>
+				<key>spriteSourceSize</key>
+				<string>{32,32}</string>
+				<key>spriteTrimmed</key>
+				<false/>
+				<key>textureRect</key>
+				<string>{{70,174},{32,32}}</string>
+				<key>textureRotated</key>
+				<false/>
+			</dict>
+			<key>GroupLabel70000</key>
+			<dict>
+				<key>aliases</key>
+				<array/>
+				<key>sourceColorRect</key>
+				<string>{{0,0},{32,32}}</string>
+				<key>spriteOffset</key>
+				<string>{0,0}</string>
+				<key>spriteSize</key>
+				<string>{32,32}</string>
+				<key>spriteSourceSize</key>
+				<string>{32,32}</string>
+				<key>spriteTrimmed</key>
+				<false/>
+				<key>textureRect</key>
+				<string>{{2,158},{32,32}}</string>
 				<key>textureRotated</key>
 				<false/>
 			</dict>

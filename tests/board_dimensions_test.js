@@ -5,6 +5,8 @@ xdescribe("Board Dimensions", function () {
     var CELL_SIZE = 50;
     var LABEL_WIDTH = 25;
     var LABEL_HEIGHT = 30;
+    var GROUP_LABELS_MARGIN_X = 2;
+    var GROUP_LABELS_MARGIN_Y = 0;
     var MARGIN_TOP = 10;
     var MARGIN_BOTTOM = 200;
     var MARGIN_HORIZONTAL = 0;
@@ -19,14 +21,14 @@ xdescribe("Board Dimensions", function () {
     var MAX_GROUP_LENGTH_ROWS = 2;
 
     beforeEach(function () {
-        var boardSizeVO = new lowfat.BoardSizeVO(CELL_SIZE, LABEL_WIDTH, LABEL_HEIGHT, MARGIN_TOP, MARGIN_BOTTOM, MARGIN_HORIZONTAL, MAX_SCALE);
+        var boardSizeVO = new lowfat.BoardSizeVO(CELL_SIZE, LABEL_WIDTH, LABEL_HEIGHT, GROUP_LABELS_MARGIN_X, GROUP_LABELS_MARGIN_Y, MARGIN_TOP, MARGIN_BOTTOM, MARGIN_HORIZONTAL, MAX_SCALE);
         boardDimensions = new lowfat.BoardDimensions({
             width: SCREEN_WIDTH_IN_POINTS,
             height: SCREEN_HEIGHT_IN_POINTS
         }, BOARD_WIDTH, BOARD_HEIGHT, MAX_GROUP_LENGTH_ROWS, MAX_GROUP_LENGTH_COLS, boardSizeVO);
     });
 
-    it("should return container coords", function () {
+    xit("should return container coords", function () {
         expect(boardDimensions.getContainerBottomY()).toBe();
     });
 
