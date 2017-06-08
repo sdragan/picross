@@ -118,6 +118,25 @@
 				<key>textureRotated</key>
 				<false/>
 			</dict>
+			<key>GroupLabel100000</key>
+			<dict>
+				<key>aliases</key>
+				<array/>
+				<key>sourceColorRect</key>
+				<string>{{0,0},{32,32}}</string>
+				<key>spriteOffset</key>
+				<string>{0,0}</string>
+				<key>spriteSize</key>
+				<string>{32,32}</string>
+				<key>spriteSourceSize</key>
+				<string>{32,32}</string>
+				<key>spriteTrimmed</key>
+				<false/>
+				<key>textureRect</key>
+				<string>{{54,140},{32,32}}</string>
+				<key>textureRotated</key>
+				<false/>
+			</dict>
 			<key>GroupLabel20000</key>
 			<dict>
 				<key>aliases</key>
@@ -152,7 +171,7 @@
 				<key>spriteTrimmed</key>
 				<false/>
 				<key>textureRect</key>
-				<string>{{36,174},{32,32}}</string>
+				<string>{{36,208},{32,32}}</string>
 				<key>textureRotated</key>
 				<false/>
 			</dict>
@@ -171,7 +190,7 @@
 				<key>spriteTrimmed</key>
 				<false/>
 				<key>textureRect</key>
-				<string>{{88,140},{32,32}}</string>
+				<string>{{2,192},{32,32}}</string>
 				<key>textureRotated</key>
 				<false/>
 			</dict>
@@ -190,7 +209,7 @@
 				<key>spriteTrimmed</key>
 				<false/>
 				<key>textureRect</key>
-				<string>{{54,140},{32,32}}</string>
+				<string>{{2,158},{32,32}}</string>
 				<key>textureRotated</key>
 				<false/>
 			</dict>
@@ -228,7 +247,45 @@
 				<key>spriteTrimmed</key>
 				<false/>
 				<key>textureRect</key>
-				<string>{{2,158},{32,32}}</string>
+				<string>{{36,174},{32,32}}</string>
+				<key>textureRotated</key>
+				<false/>
+			</dict>
+			<key>GroupLabel80000</key>
+			<dict>
+				<key>aliases</key>
+				<array/>
+				<key>sourceColorRect</key>
+				<string>{{0,0},{32,32}}</string>
+				<key>spriteOffset</key>
+				<string>{0,0}</string>
+				<key>spriteSize</key>
+				<string>{32,32}</string>
+				<key>spriteSourceSize</key>
+				<string>{32,32}</string>
+				<key>spriteTrimmed</key>
+				<false/>
+				<key>textureRect</key>
+				<string>{{88,140},{32,32}}</string>
+				<key>textureRotated</key>
+				<false/>
+			</dict>
+			<key>GroupLabel90000</key>
+			<dict>
+				<key>aliases</key>
+				<array/>
+				<key>sourceColorRect</key>
+				<string>{{0,0},{32,32}}</string>
+				<key>spriteOffset</key>
+				<string>{0,0}</string>
+				<key>spriteSize</key>
+				<string>{32,32}</string>
+				<key>spriteSourceSize</key>
+				<string>{32,32}</string>
+				<key>spriteTrimmed</key>
+				<false/>
+				<key>textureRect</key>
+				<string>{{70,208},{32,32}}</string>
 				<key>textureRotated</key>
 				<false/>
 			</dict>
