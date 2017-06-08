@@ -10,10 +10,24 @@ lowfat.Gamefield = function (scene, spriteFactory) {
     var controls = null;
 
     var bgGradient = null;
-    var gridContainer = null;
+    var boardContainer = null;
 
     function initVars() {
-        board = new lowfat.Board(4, 5, [0, 1, 0, 1, 0, 0, 0, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1, 1]);
+        var nonogram = [
+            1, 1, 1, 0, 0, 1, 0, 0, 1, 1,
+            1, 1, 0, 0, 0, 0, 0, 1, 0, 1,
+            1, 1, 0, 0, 0, 0, 0, 1, 0, 1,
+            1, 1, 0, 0, 0, 0, 0, 0, 0, 1,
+            1, 1, 1, 0, 0, 0, 0, 0, 1, 1,
+            1, 1, 1, 1, 0, 0, 0, 1, 1, 1,
+            0, 1, 0, 1, 1, 0, 1, 1, 1, 1,
+            1, 0, 1, 1, 1, 1, 1, 0, 1, 0,
+            0, 1, 0, 1, 1, 1, 1, 1, 0, 1,
+            1, 1, 1, 1, 1, 1, 1, 0, 1, 0
+        ];
+
+        board = new lowfat.Board(10, 10, nonogram);
+        // board = new lowfat.Board(4, 5, [0, 1, 0, 1, 0, 0, 0, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1, 1]);
         var boardSizeVO = new lowfat.BoardSizeVO(50, 14, 18, 2, 2, 0, 0, 0, 1.5);
         boardDimensions = new lowfat.BoardDimensions(cc.director.getWinSize(), board.getWidth(), board.getHeight(), board.getBiggestGroupsAmountInRows(), board.getBiggestGroupsAmountInCols(), boardSizeVO);
         groupLabelsRows = [];
@@ -23,10 +37,10 @@ lowfat.Gamefield = function (scene, spriteFactory) {
     function initLayers() {
         bgGradient = new cc.LayerGradient(cc.color(161, 224, 229), cc.color(76, 161, 175));
         container.addChild(bgGradient);
-        gridContainer = new cc.Node();
-        container.addChild(gridContainer);
-        gridContainer.setPosition(boardDimensions.getContainerLeftX(), boardDimensions.getContainerBottomY());
-        gridContainer.setScale(boardDimensions.getScale(), boardDimensions.getScale());
+        boardContainer = new cc.Node();
+        container.addChild(boardContainer);
+        boardContainer.setPosition(boardDimensions.getContainerLeftX(), boardDimensions.getContainerBottomY());
+        boardContainer.setScale(boardDimensions.getScale(), boardDimensions.getScale());
     }
 
     function initControls() {
@@ -39,11 +53,11 @@ lowfat.Gamefield = function (scene, spriteFactory) {
             for (var col = 0; col < board.getWidth(); col++) {
                 var gridCell = spriteFactory.getSprite("GridCell");
                 gridCell.setPosition(boardDimensions.cellToPointsXLocal(col), boardDimensions.cellToPointsYLocal(row));
-                gridContainer.addChild(gridCell);
+                boardContainer.addChild(gridCell);
 
                 // var cellContent = board.getIsFilled(col, row) ? spriteFactory.getSprite("CellFilled") : spriteFactory.getSprite("CellEmptySmall");
                 // cellContent.setPosition(boardDimensions.cellToPointsXLocal(col), boardDimensions.cellToPointsYLocal(row));
-                // gridContainer.addChild(cellContent);
+                // boardContainer.addChild(cellContent);
             }
         }
     }
@@ -62,7 +76,7 @@ lowfat.Gamefield = function (scene, spriteFactory) {
             for (i = 0; i < groupsCount; i++) {
                 label = spriteFactory.getSprite("GroupLabel" + groups[i]);
                 label.setPosition(boardDimensions.labelRowToPointsXLocal(i, groupsCount), boardDimensions.labelRowToPointsYLocal(row));
-                gridContainer.addChild(label);
+                boardContainer.addChild(label);
                 labelsInLine.push(label);
             }
             groupLabelsRows[row] = labelsInLine;
@@ -75,7 +89,7 @@ lowfat.Gamefield = function (scene, spriteFactory) {
             for (i = 0; i < groupsCount; i++) {
                 label = spriteFactory.getSprite("GroupLabel" + groups[i]);
                 label.setPosition(boardDimensions.labelColToPointsXLocal(col), boardDimensions.labelColToPointsYLocal(i, groupsCount));
-                gridContainer.addChild(label);
+                boardContainer.addChild(label);
                 labelsInLine.push(label);
             }
             groupLabelsCols[col] = labelsInLine;
@@ -104,7 +118,7 @@ lowfat.Gamefield = function (scene, spriteFactory) {
             board.mark(cellX, cellY);
             var newColStatus = board.getMarkedGroupsInCol(cellX);
             var newRowStatus = board.getMarkedGroupsInRow(cellY);
-            updateLabelsIfNecessary(oldColStatus, oldRowStatus, newColStatus, newRowStatus);
+            updateLabelsIfNecessary(cellX, cellY, oldColStatus, oldRowStatus, newColStatus, newRowStatus);
             revealRestOfColOrRowIfNecessary(cellX, cellY, newColStatus, newRowStatus);
             revealFilledCell(cellX, cellY);
         } else {
@@ -117,7 +131,7 @@ lowfat.Gamefield = function (scene, spriteFactory) {
     function revealFilledCell(cellX, cellY) {
         var cellContent = spriteFactory.getSprite("CellFilled");
         cellContent.setPosition(boardDimensions.cellToPointsXLocal(cellX), boardDimensions.cellToPointsYLocal(cellY));
-        gridContainer.addChild(cellContent);
+        boardContainer.addChild(cellContent);
 
         var upScaleAction = new cc.ScaleTo(0.1, 1.1, 1.1).easing(cc.easeCubicActionOut());
         var waitAction = new cc.DelayTime(0.15);
@@ -129,7 +143,7 @@ lowfat.Gamefield = function (scene, spriteFactory) {
     function revealMistake(cellX, cellY) {
         var cellContent = spriteFactory.getSprite("CellMistake");
         cellContent.setPosition(boardDimensions.cellToPointsXLocal(cellX), boardDimensions.cellToPointsYLocal(cellY));
-        gridContainer.addChild(cellContent);
+        boardContainer.addChild(cellContent);
 
         var upScaleAction = new cc.ScaleTo(0.1, 1.1, 1.1).easing(cc.easeCubicActionOut());
         var waitAction = new cc.DelayTime(0.15);
@@ -141,21 +155,22 @@ lowfat.Gamefield = function (scene, spriteFactory) {
     function revealEmptyCell(cellX, cellY, delay) {
         var cellContent = spriteFactory.getSprite("CellEmptySmall");
         cellContent.setPosition(boardDimensions.cellToPointsXLocal(cellX), boardDimensions.cellToPointsYLocal(cellY));
-        gridContainer.addChild(cellContent);
+        boardContainer.addChild(cellContent);
         cellContent.setScale(0, 0);
         var upScaleAction = new cc.ScaleTo(0.1, 1.1, 1.1).easing(cc.easeCubicActionOut());
         var waitAction = new cc.DelayTime(0.15);
         var scaleDownAction = new cc.ScaleTo(0.25, 1, 1).easing(cc.easeQuadraticActionOut());
+        var sequence;
         if (typeof delay != "undefined" && delay != null) {
             var delayAction = new cc.DelayTime(delay);
-            var sequence = new cc.Sequence(delayAction, upScaleAction, waitAction, scaleDownAction);
+            sequence = new cc.Sequence(delayAction, upScaleAction, waitAction, scaleDownAction);
         } else {
-            var sequence = new cc.Sequence(upScaleAction, waitAction, scaleDownAction);
+            sequence = new cc.Sequence(upScaleAction, waitAction, scaleDownAction);
         }
         cellContent.runAction(sequence);
     }
 
-    function updateLabelsIfNecessary(oldColsStatus, oldRowsStatus, newColsStatus, newRowsStatus) {
+    function updateLabelsIfNecessary(cellX, cellY, oldColsStatus, oldRowsStatus, newColsStatus, newRowsStatus) {
         var colChangeIndex = getIndexOfDifferentElement(oldColsStatus, newColsStatus);
         var rowChangeIndex = getIndexOfDifferentElement(oldRowsStatus, newRowsStatus);
 
@@ -163,6 +178,20 @@ lowfat.Gamefield = function (scene, spriteFactory) {
             return;
         }
 
+        var label;
+        var scale = 0.8;
+        var opacity = 100;
+        var duration = 0.2;
+        if (colChangeIndex >= 0) {
+            label = groupLabelsCols[cellX][colChangeIndex];
+            label.runAction(new cc.ScaleTo(duration, scale, scale));
+            label.setOpacity(opacity);
+        }
+        if (rowChangeIndex >= 0) {
+            label = groupLabelsRows[cellY][rowChangeIndex];
+            label.runAction(new cc.ScaleTo(duration, scale, scale));
+            label.setOpacity(opacity);
+        }
     }
 
     function revealRestOfColOrRowIfNecessary(cellX, cellY, newColStatus, newRowStatus) {
@@ -195,7 +224,8 @@ lowfat.Gamefield = function (scene, spriteFactory) {
     this.onResize = function (screenSizeInPoints) {
         boardDimensions.resize(screenSizeInPoints);
         bgGradient.setContentSize(screenSizeInPoints.width, screenSizeInPoints.height);
-    }
+        boardContainer.setPositionX(boardDimensions.getContainerLeftX());
+    };
 
     function getIndexOfDifferentElement(arrA, arrB) {
         if (arrA.length != arrB.length) {
