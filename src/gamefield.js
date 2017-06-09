@@ -13,21 +13,11 @@ lowfat.Gamefield = function (scene, spriteFactory) {
     var boardContainer = null;
 
     function initVars() {
-        var nonogram = [
-            1, 1, 1, 0, 0, 1, 0, 0, 1, 1,
-            1, 1, 0, 0, 0, 0, 0, 1, 0, 1,
-            1, 1, 0, 0, 0, 0, 0, 1, 0, 1,
-            1, 1, 0, 0, 0, 0, 0, 0, 0, 1,
-            1, 1, 1, 0, 0, 0, 0, 0, 1, 1,
-            1, 1, 1, 1, 0, 0, 0, 1, 1, 1,
-            0, 1, 0, 1, 1, 0, 1, 1, 1, 1,
-            1, 0, 1, 1, 1, 1, 1, 0, 1, 0,
-            0, 1, 0, 1, 1, 1, 1, 1, 0, 1,
-            1, 1, 1, 1, 1, 1, 1, 0, 1, 0
-        ];
+        // var smallBoard4x5 = new lowfat.Board(4, 5, [0, 1, 0, 1, 0, 0, 0, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1, 1]);
+        // var boardHeart10x10 = new lowfat.Board(10, 10, [1, 1, 1, 0, 0, 1, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 1, 0, 1, 1, 1, 0, 0, 0, 0, 0, 1, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 0, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 0, 0, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0]);
+        var boardGlass8x8 = new lowfat.Board(8, 8, [0, 1, 1, 1, 1, 0, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1]);
 
-        board = new lowfat.Board(10, 10, nonogram);
-        // board = new lowfat.Board(4, 5, [0, 1, 0, 1, 0, 0, 0, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1, 1]);
+        board = boardGlass8x8;
         var boardSizeVO = new lowfat.BoardSizeVO(50, 14, 18, 2, 2, 0, 0, 0, 1.5);
         boardDimensions = new lowfat.BoardDimensions(cc.director.getWinSize(), board.getWidth(), board.getHeight(), board.getBiggestGroupsAmountInRows(), board.getBiggestGroupsAmountInCols(), boardSizeVO);
         groupLabelsRows = [];
@@ -55,9 +45,7 @@ lowfat.Gamefield = function (scene, spriteFactory) {
                 gridCell.setPosition(boardDimensions.cellToPointsXLocal(col), boardDimensions.cellToPointsYLocal(row));
                 boardContainer.addChild(gridCell);
 
-                // var cellContent = board.getIsFilled(col, row) ? spriteFactory.getSprite("CellFilled") : spriteFactory.getSprite("CellEmptySmall");
-                // cellContent.setPosition(boardDimensions.cellToPointsXLocal(col), boardDimensions.cellToPointsYLocal(row));
-                // boardContainer.addChild(cellContent);
+                // showCellContent(col, row, board.getIsFilled(col, row) ? "CellFilled" : "CellEmptySmall");
             }
         }
     }
@@ -112,48 +100,32 @@ lowfat.Gamefield = function (scene, spriteFactory) {
             return;
         }
 
+        board.mark(cellX, cellY);
         if (board.getIsFilled(cellX, cellY)) {
-            var oldColStatus = board.getMarkedGroupsInCol(cellX);
-            var oldRowStatus = board.getMarkedGroupsInRow(cellY);
-            board.mark(cellX, cellY);
             var newColStatus = board.getMarkedGroupsInCol(cellX);
             var newRowStatus = board.getMarkedGroupsInRow(cellY);
-            updateLabelsIfNecessary(cellX, cellY, oldColStatus, oldRowStatus, newColStatus, newRowStatus);
             revealRestOfColOrRowIfNecessary(cellX, cellY, newColStatus, newRowStatus);
             revealFilledCell(cellX, cellY);
         } else {
-            board.mark(cellX, cellY);
             revealMistake(cellX, cellY);
             controls.forceStopDrag();
         }
     }
 
     function revealFilledCell(cellX, cellY) {
-        var cellContent = spriteFactory.getSprite("CellFilled");
-        cellContent.setPosition(boardDimensions.cellToPointsXLocal(cellX), boardDimensions.cellToPointsYLocal(cellY));
-        boardContainer.addChild(cellContent);
-
-        var upScaleAction = new cc.ScaleTo(0.1, 1.1, 1.1).easing(cc.easeCubicActionOut());
-        var waitAction = new cc.DelayTime(0.15);
-        var scaleDownAction = new cc.ScaleTo(0.25, 1, 1).easing(cc.easeQuadraticActionOut());
-        var sequence = new cc.Sequence(upScaleAction, waitAction, scaleDownAction);
-        cellContent.runAction(sequence);
+        showCellContent(cellX, cellY, "CellFilled");
     }
 
     function revealMistake(cellX, cellY) {
-        var cellContent = spriteFactory.getSprite("CellMistake");
-        cellContent.setPosition(boardDimensions.cellToPointsXLocal(cellX), boardDimensions.cellToPointsYLocal(cellY));
-        boardContainer.addChild(cellContent);
-
-        var upScaleAction = new cc.ScaleTo(0.1, 1.1, 1.1).easing(cc.easeCubicActionOut());
-        var waitAction = new cc.DelayTime(0.15);
-        var scaleDownAction = new cc.ScaleTo(0.25, 1, 1).easing(cc.easeQuadraticActionOut());
-        var sequence = new cc.Sequence(upScaleAction, waitAction, scaleDownAction);
-        cellContent.runAction(sequence);
+        showCellContent(cellX, cellY, "CellMistake");
     }
 
     function revealEmptyCell(cellX, cellY, delay) {
-        var cellContent = spriteFactory.getSprite("CellEmptySmall");
+        showCellContent(cellX, cellY, "CellEmptySmall", delay);
+    }
+
+    function showCellContent(cellX, cellY, spriteName, delay) {
+        var cellContent = spriteFactory.getSprite(spriteName);
         cellContent.setPosition(boardDimensions.cellToPointsXLocal(cellX), boardDimensions.cellToPointsYLocal(cellY));
         boardContainer.addChild(cellContent);
         cellContent.setScale(0, 0);
@@ -170,53 +142,57 @@ lowfat.Gamefield = function (scene, spriteFactory) {
         cellContent.runAction(sequence);
     }
 
-    function updateLabelsIfNecessary(cellX, cellY, oldColsStatus, oldRowsStatus, newColsStatus, newRowsStatus) {
-        var colChangeIndex = getIndexOfDifferentElement(oldColsStatus, newColsStatus);
-        var rowChangeIndex = getIndexOfDifferentElement(oldRowsStatus, newRowsStatus);
-
-        if (colChangeIndex == -1 && rowChangeIndex == -1) {
-            return;
-        }
-
-        var label;
+    function grayLabelOut(label) {
         var scale = 0.8;
         var opacity = 100;
         var duration = 0.2;
-        if (colChangeIndex >= 0) {
-            label = groupLabelsCols[cellX][colChangeIndex];
-            label.runAction(new cc.ScaleTo(duration, scale, scale));
-            label.setOpacity(opacity);
-        }
-        if (rowChangeIndex >= 0) {
-            label = groupLabelsRows[cellY][rowChangeIndex];
-            label.runAction(new cc.ScaleTo(duration, scale, scale));
-            label.setOpacity(opacity);
-        }
+        label.runAction(new cc.ScaleTo(duration, scale, scale));
+        label.setOpacity(opacity);
     }
 
     function revealRestOfColOrRowIfNecessary(cellX, cellY, newColStatus, newRowStatus) {
         var markedCellsCount = 0;
-        var delay = 0.1;
+        var delay = 0.08;
+        var i;
 
         if (allElementsOfArrayAreEqualTo(newColStatus, true)) {
-            for (var row = 0; row < board.getWidth(); row++) {
-                if (!board.getIsMarked(cellX, row)) {
-                    revealEmptyCell(cellX, row, delay * markedCellsCount);
-                    board.mark(cellX, row);
-                    markedCellsCount++;
+            var row;
+            if (cellY < board.getHeight() / 2) {
+                for (row = 0; row < board.getHeight(); row++) {
+                    revealEmptyCellIfNotMarked(cellX, row);
                 }
+            } else {
+                for (row = board.getHeight() - 1; row >= 0; row--) {
+                    revealEmptyCellIfNotMarked(cellX, row);
+                }
+            }
+            for (i = 0; i < groupLabelsCols[cellX].length; i++) {
+                grayLabelOut(groupLabelsCols[cellX][i]);
             }
         }
 
         markedCellsCount = 0;
-
         if (allElementsOfArrayAreEqualTo(newRowStatus, true)) {
-            for (var col = 0; col < board.getWidth(); col++) {
-                if (!board.getIsMarked(col, cellY)) {
-                    revealEmptyCell(col, cellY, delay * markedCellsCount);
-                    board.mark(col, cellY);
-                    markedCellsCount++;
+            var col;
+            if (cellX < board.getWidth() / 2) {
+                for (col = 0; col < board.getWidth(); col++) {
+                    revealEmptyCellIfNotMarked(col, cellY);
                 }
+            } else {
+                for (col = board.getWidth() - 1; col >= 0; col--) {
+                    revealEmptyCellIfNotMarked(col, cellY);
+                }
+            }
+            for (i = 0; i < groupLabelsRows[cellY].length; i++) {
+                grayLabelOut(groupLabelsRows[cellY][i]);
+            }
+        }
+
+        function revealEmptyCellIfNotMarked(cX, cY) {
+            if (!board.getIsMarked(cX, cY)) {
+                revealEmptyCell(cX, cY, delay * markedCellsCount);
+                board.mark(cX, cY);
+                markedCellsCount++;
             }
         }
     }
@@ -226,18 +202,6 @@ lowfat.Gamefield = function (scene, spriteFactory) {
         bgGradient.setContentSize(screenSizeInPoints.width, screenSizeInPoints.height);
         boardContainer.setPositionX(boardDimensions.getContainerLeftX());
     };
-
-    function getIndexOfDifferentElement(arrA, arrB) {
-        if (arrA.length != arrB.length) {
-            throw new Error("Arrays of different length provided")
-        }
-        for (var i = 0; i < arrA.length; i++) {
-            if (arrA[i] != arrB[i]) {
-                return i;
-            }
-        }
-        return -1;
-    }
 
     function allElementsOfArrayAreEqualTo(arr, value) {
         for (var i = 0; i < arr.length; i++) {
@@ -251,6 +215,7 @@ lowfat.Gamefield = function (scene, spriteFactory) {
 
 lowfat.TouchControls = function (scene, boardDimensions, selectCellCallback) {
     var touchStarted = false;
+    var that = this;
 
     this.init = function () {
         this.addListeners();
@@ -291,7 +256,12 @@ lowfat.TouchControls = function (scene, boardDimensions, selectCellCallback) {
     }
 
     function processTouchUpdated(touchX, touchY, delta) {
-        if (!touchStarted || !boardDimensions.getIsInsideBoard(touchX, touchY)) {
+        if (!touchStarted) {
+            return;
+        }
+
+        if (!boardDimensions.getIsInsideBoard(touchX, touchY)) {
+            that.forceStopDrag();
             return;
         }
 
