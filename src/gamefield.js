@@ -1,14 +1,15 @@
 var lowfat = lowfat || {};
 
 lowfat.Gamefield = function (scene, spriteFactory) {
-    var that = this;
     var container = scene;
     var board = null;
     var boardDimensions = null;
     var groupLabelsRows = null;
     var groupLabelsCols = null;
+    var gridCellSprites = null;
+    var gridContentSprites = null;
     var controls = null;
-
+    var livesLeft;
     var bgGradient = null;
     var boardContainer = null;
 
@@ -20,8 +21,7 @@ lowfat.Gamefield = function (scene, spriteFactory) {
         board = boardGlass8x8;
         var boardSizeVO = new lowfat.BoardSizeVO(50, 14, 18, 2, 2, 0, 0, 0, 1.5);
         boardDimensions = new lowfat.BoardDimensions(cc.director.getWinSize(), board.getWidth(), board.getHeight(), board.getBiggestGroupsAmountInRows(), board.getBiggestGroupsAmountInCols(), boardSizeVO);
-        groupLabelsRows = [];
-        groupLabelsCols = [];
+        livesLeft = 3;
     }
 
     function initLayers() {
@@ -35,22 +35,28 @@ lowfat.Gamefield = function (scene, spriteFactory) {
 
     function initControls() {
         controls = new lowfat.TouchControls(scene, boardDimensions, selectCell);
-        controls.init();
+        controls.enable();
     }
 
     function drawBoard() {
+        gridCellSprites = [];
+        gridContentSprites = [];
         for (var row = 0; row < board.getHeight(); row++) {
             for (var col = 0; col < board.getWidth(); col++) {
                 var gridCell = spriteFactory.getSprite("GridCell");
                 gridCell.setPosition(boardDimensions.cellToPointsXLocal(col), boardDimensions.cellToPointsYLocal(row));
                 boardContainer.addChild(gridCell);
+                gridCellSprites.push(gridCell);
 
                 // showCellContent(col, row, board.getIsFilled(col, row) ? "CellFilled" : "CellEmptySmall");
             }
         }
     }
 
-    function drawMarks() {
+    function drawLabels() {
+        groupLabelsRows = [];
+        groupLabelsCols = [];
+
         var groupsCount;
         var groups;
         var labelsInLine;
@@ -89,7 +95,7 @@ lowfat.Gamefield = function (scene, spriteFactory) {
         initLayers();
         initControls();
         drawBoard();
-        drawMarks();
+        drawLabels();
     };
 
     function selectCell(cellX, cellY) {
@@ -109,7 +115,20 @@ lowfat.Gamefield = function (scene, spriteFactory) {
         } else {
             revealMistake(cellX, cellY);
             controls.forceStopDrag();
+            livesLeft--;
+            if (livesLeft <= 0) {
+                levelLost();
+            }
         }
+    }
+
+    function levelLost() {
+        controls.disable();
+        for (var i = 0; i < gridContentSprites.length; i++) {
+            gridContentSprites[i].removeFromParent();
+        }
+        initVars();
+        controls.enable();
     }
 
     function revealFilledCell(cellX, cellY) {
@@ -128,6 +147,7 @@ lowfat.Gamefield = function (scene, spriteFactory) {
         var cellContent = spriteFactory.getSprite(spriteName);
         cellContent.setPosition(boardDimensions.cellToPointsXLocal(cellX), boardDimensions.cellToPointsYLocal(cellY));
         boardContainer.addChild(cellContent);
+        gridContentSprites.push(cellContent);
         cellContent.setScale(0, 0);
         var upScaleAction = new cc.ScaleTo(0.1, 1.1, 1.1).easing(cc.easeCubicActionOut());
         var waitAction = new cc.DelayTime(0.15);
@@ -215,13 +235,26 @@ lowfat.Gamefield = function (scene, spriteFactory) {
 
 lowfat.TouchControls = function (scene, boardDimensions, selectCellCallback) {
     var touchStarted = false;
+    var enabled = false;
     var that = this;
 
-    this.init = function () {
-        this.addListeners();
+    this.enable = function () {
+        if (enabled) {
+            throw new Error("Trying to enable controls, but they are already enabled");
+        }
+        enabled = true;
+        addListeners();
     };
 
-    this.addListeners = function () {
+    this.disable = function () {
+        if (!enabled) {
+            throw new Error("Trying to disable controls, but they are already disabled");
+        }
+        enabled = false;
+        removeListeners();
+    };
+
+    function addListeners() {
         cc.eventManager.addListener({
             event: cc.EventListener.TOUCH_ONE_BY_ONE,
             swallowTouches: true,
@@ -236,11 +269,11 @@ lowfat.TouchControls = function (scene, boardDimensions, selectCellCallback) {
                 processTouchEnded(touch.getLocation().x, touch.getLocation().y);
             }
         }, scene);
-    };
+    }
 
-    this.removeListeners = function () {
+    function removeListeners() {
         cc.eventManager.removeListeners(cc.EventListener.TOUCH_ONE_BY_ONE);
-    };
+    }
 
     this.forceStopDrag = function () {
         touchStarted = false;
