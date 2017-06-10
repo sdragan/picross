@@ -124,11 +124,47 @@ lowfat.Gamefield = function (scene, spriteFactory) {
 
     function levelLost() {
         controls.disable();
-        for (var i = 0; i < gridContentSprites.length; i++) {
-            gridContentSprites[i].removeFromParent();
+        startBoardClearAnimation();
+    }
+
+    function startBoardClearAnimation() {
+        var totalDuration = 0.8;
+        var gridContentLength = gridContentSprites.length;
+        var partialDuration = totalDuration / gridContentLength;
+        var scaleDownDuration = 0.1;
+        for (var i = 0; i < gridContentLength; i++) {
+            var cellContent = gridContentSprites[i];
+            var delay = totalDuration - i * partialDuration;
+            var delayAction = new cc.DelayTime(delay);
+            var scaleDownAction = new cc.ScaleTo(scaleDownDuration, 0, 0);
+            var disappearAction = new cc.CallFunc(cellContent.removeFromParent, cellContent);
+            var sequenceAction = new cc.Sequence(delayAction, scaleDownAction, disappearAction);
+            cellContent.runAction(sequenceAction);
         }
+        boardContainer.runAction(new cc.Sequence(new cc.DelayTime(totalDuration), new cc.CallFunc(onBoardClearAnimationFinished)));
+    }
+
+    function onBoardClearAnimationFinished() {
         initVars();
+        resetGroupLabels();
         controls.enable();
+    }
+
+    function resetGroupLabels() {
+        var i;
+        var u;
+        for (i = 0; i < groupLabelsCols.length; i++) {
+            for (u = 0; u < groupLabelsCols[i].length; u++) {
+                groupLabelsCols[i][u].setOpacity(255);
+                groupLabelsCols[i][u].setScale(1, 1);
+            }
+        }
+        for (i = 0; i < groupLabelsRows.length; i++) {
+            for (u = 0; u < groupLabelsRows[i].length; u++) {
+                groupLabelsRows[i][u].setOpacity(255);
+                groupLabelsRows[i][u].setScale(1, 1);
+            }
+        }
     }
 
     function revealFilledCell(cellX, cellY) {
