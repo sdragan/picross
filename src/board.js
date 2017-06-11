@@ -6,6 +6,7 @@ lowfat.Board = function (cols, rows, elementsArray, marksArray) {
     var height = rows;
     var elements = elementsArray;
     var marks = initMarks(marksArray);
+    var totalFilledCells = calculateTotalFilledCells();
 
     function initMarks(marksArrayFromParams) {
         if (typeof marksArrayFromParams == "undefined" || marksArrayFromParams == null || marksArrayFromParams.length == 0) {
@@ -20,6 +21,16 @@ lowfat.Board = function (cols, rows, elementsArray, marksArray) {
             throw new Error ("marksArray has incorrect amount of elements");
         }
         return marksArrayFromParams;
+    }
+
+    function calculateTotalFilledCells() {
+        var result = 0;
+        for (var i = 0; i < elementsArray.length; i++) {
+            if (elementsArray[i] == 1) {
+                result++;
+            }
+        }
+        return result;
     }
 
     this.getGroupsInRow = function (row) {
@@ -117,6 +128,10 @@ lowfat.Board = function (cols, rows, elementsArray, marksArray) {
             }
             return result;
         };
+
+    this.getTotalFilledCells = function () {
+        return totalFilledCells;
+    };
 
     this.mark = function (x, y) {
         checkBounds(x, y);

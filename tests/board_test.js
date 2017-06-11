@@ -45,6 +45,10 @@ describe("Board", function () {
         expect(function() {board.mark(-1, 5)}).toThrow();
     });
 
+    it("should return total filled cells amount", function () {
+        expect(board.getTotalFilledCells()).toBe(12);
+    });
+
     it("should return groups in row", function () {
         var expectedRow0 = [1, 1];
         var expectedRow1 = [];
