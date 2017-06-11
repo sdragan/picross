@@ -13,7 +13,7 @@ describe("Board", function () {
      */
 
     beforeEach(function () {
-        board = new lowfat.Board(BOARD_PRESET_WIDTH, BOARD_PRESET_HEIGHT, BOARD_PRESET);
+        board = lowfat.Board(BOARD_PRESET_WIDTH, BOARD_PRESET_HEIGHT, BOARD_PRESET);
     });
 
     it("should return width and height", function () {
@@ -54,7 +54,7 @@ describe("Board", function () {
         board.mark(1, 0);
         board.mark(2, 4);
         expect(board.getGuessedCellsAmount()).toBe(2);
-        board = new lowfat.Board(BOARD_PRESET_WIDTH, BOARD_PRESET_HEIGHT, BOARD_PRESET, [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0]);
+        board = lowfat.Board(BOARD_PRESET_WIDTH, BOARD_PRESET_HEIGHT, BOARD_PRESET, [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0]);
         expect(board.getGuessedCellsAmount()).toBe(9);
     });
 
@@ -62,7 +62,7 @@ describe("Board", function () {
         expect(board.getIsSolved()).toBe(false);
         board.mark(1, 0);
         expect(board.getIsSolved()).toBe(false);
-        board = new lowfat.Board(BOARD_PRESET_WIDTH, BOARD_PRESET_HEIGHT, BOARD_PRESET, [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0]);
+        board = lowfat.Board(BOARD_PRESET_WIDTH, BOARD_PRESET_HEIGHT, BOARD_PRESET, [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0]);
         expect(board.getIsSolved()).toBe(false);
         board.mark(3, 4);
         expect(board.getIsSolved()).toBe(true);
@@ -155,20 +155,20 @@ describe("Board", function () {
         });
 
     it("should init with marked cells array", function () {
-        board = new lowfat.Board(2, 2, [1, 0, 0, 1], [1, 1, 1, 0]);
+        board = lowfat.Board(2, 2, [1, 0, 0, 1], [1, 1, 1, 0]);
         expect(board.getIsMarked(1, 0)).toBe(true);
         expect(board.getIsMarked(1, 1)).toBe(false);
 
-        board = new lowfat.Board(2, 2, [1, 0, 0, 1], []);
+        board = lowfat.Board(2, 2, [1, 0, 0, 1], []);
         expect(board.getIsMarked(1, 0)).toBe(false);
         expect(board.getIsMarked(1, 1)).toBe(false);
 
-        board = new lowfat.Board(2, 2, [1, 0, 0, 1]);
+        board = lowfat.Board(2, 2, [1, 0, 0, 1]);
         expect(board.getIsMarked(1, 0)).toBe(false);
         expect(board.getIsMarked(1, 1)).toBe(false);
 
         expect(function () {
-            board = new lowfat.Board(2, 2, [1, 0, 0, 1], [1, 1, 1]);
+            board = lowfat.Board(2, 2, [1, 0, 0, 1], [1, 1, 1]);
         }).toThrow();
     });
 });

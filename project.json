@@ -17,7 +17,7 @@
         "src/game_scene.js",
         "src/gamefield.js",
         "src/gamefield_ui.js",
-        "src/board_classless.js",
+        "src/board.js",
         "src/board_dimensions.js"
     ]
 }

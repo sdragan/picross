@@ -1,7 +1,6 @@
 var lowfat = lowfat || {};
 
 lowfat.Board = function (cols, rows, elementsArray, marksArray) {
-    var that = this;
     var width = cols;
     var height = rows;
     var elements = elementsArray;
@@ -12,14 +11,14 @@ lowfat.Board = function (cols, rows, elementsArray, marksArray) {
     function initMarks(marksArrayFromParams) {
         if (typeof marksArrayFromParams == "undefined" || marksArrayFromParams == null || marksArrayFromParams.length == 0) {
             var result = [];
-            for (var i = 0; i < that.width * that.height; i++) {
+            for (var i = 0; i < width * height; i++) {
                 result.push(0);
             }
             return result;
         }
 
         if (marksArrayFromParams.length != width * height) {
-            throw new Error ("marksArray has incorrect amount of elements");
+            throw new Error("marksArray has incorrect amount of elements");
         }
         return marksArrayFromParams;
     }
@@ -45,12 +44,12 @@ lowfat.Board = function (cols, rows, elementsArray, marksArray) {
     }
 
     function checkGuessedCell(x, y) {
-        if (that.getIsFilled(x, y) && that.getIsMarked(x, y)) {
+        if (getIsFilled(x, y) && getIsMarked(x, y)) {
             guessedCellsAmount++;
         }
     }
 
-    this.getGroupsInRow = function (row) {
+    function getGroupsInRow(row) {
         var groupLength = 0;
         var groups = [];
         for (var i = 0; i < width; i++) {
@@ -64,9 +63,9 @@ lowfat.Board = function (cols, rows, elementsArray, marksArray) {
             }
         }
         return groups;
-    };
+    }
 
-    this.getGroupsInCol = function (col) {
+    function getGroupsInCol(col) {
         var groupLength = 0;
         var groups = [];
         for (var i = 0; i < height; i++) {
@@ -80,9 +79,9 @@ lowfat.Board = function (cols, rows, elementsArray, marksArray) {
             }
         }
         return groups;
-    };
+    }
 
-    this.getMarkedGroupsInRow = function (row) {
+    function getMarkedGroupsInRow(row) {
         var groupLength = 0;
         var groupIsMarkedCompletely = true;
         var markedGroups = [];
@@ -90,7 +89,7 @@ lowfat.Board = function (cols, rows, elementsArray, marksArray) {
             var isFilled = this.getIsFilled(i, row);
             if (isFilled) {
                 groupLength++;
-                if (!that.getIsMarked(i, row)) {
+                if (!getIsMarked(i, row)) {
                     groupIsMarkedCompletely = false;
                 }
             }
@@ -101,9 +100,9 @@ lowfat.Board = function (cols, rows, elementsArray, marksArray) {
             }
         }
         return markedGroups;
-    };
+    }
 
-    this.getMarkedGroupsInCol = function (col) {
+    function getMarkedGroupsInCol(col) {
         var groupLength = 0;
         var groupIsMarkedCompletely = true;
         var markedGroups = [];
@@ -111,7 +110,7 @@ lowfat.Board = function (cols, rows, elementsArray, marksArray) {
             var isFilled = this.getIsFilled(col, i);
             if (isFilled) {
                 groupLength++;
-                if (!that.getIsMarked(col, i)) {
+                if (!getIsMarked(col, i)) {
                     groupIsMarkedCompletely = false;
                 }
             }
@@ -122,9 +121,9 @@ lowfat.Board = function (cols, rows, elementsArray, marksArray) {
             }
         }
         return markedGroups;
-    };
+    }
 
-    this.getBiggestGroupsAmountInRows = function () {
+    function getBiggestGroupsAmountInRows() {
         var result = 0;
         for (var row = 0; row < height; row++) {
             var groupsInRow = this.getGroupsInRow(row).length;
@@ -133,61 +132,78 @@ lowfat.Board = function (cols, rows, elementsArray, marksArray) {
             }
         }
         return result;
-    };
+    }
 
-    this.getBiggestGroupsAmountInCols = function () {
-            var result = 0;
-            for (var col = 0; col < width; col++) {
-                var groupsInCol = this.getGroupsInCol(col).length;
-                if (result < groupsInCol) {
-                    result = groupsInCol;
-                }
+    function getBiggestGroupsAmountInCols() {
+        var result = 0;
+        for (var col = 0; col < width; col++) {
+            var groupsInCol = this.getGroupsInCol(col).length;
+            if (result < groupsInCol) {
+                result = groupsInCol;
             }
-            return result;
-        };
+        }
+        return result;
+    }
 
-    this.getTotalFilledCells = function () {
+    function getTotalFilledCells() {
         return totalFilledCells;
-    };
+    }
 
-    this.getGuessedCellsAmount = function () {
+    function getGuessedCellsAmount() {
         return guessedCellsAmount;
-    };
+    }
 
-    this.getIsSolved = function () {
-        return that.getGuessedCellsAmount() == that.getTotalFilledCells();
-    };
+    function getIsSolved() {
+        return getGuessedCellsAmount() == getTotalFilledCells();
+    }
 
-    this.mark = function (x, y) {
+    function mark(x, y) {
         checkBounds(x, y);
         if (this.getIsMarked(x, y) == true) {
             throw new Error("Cell " + x + ", " + y + " is already marked");
         }
         marks [y * width + x] = 1;
         checkGuessedCell(x, y);
-    };
+    }
 
-    this.getIsFilled = function (x, y) {
+    function getIsFilled(x, y) {
         checkBounds(x, y);
         return elements[y * width + x] == 1;
-    };
+    }
 
-    this.getIsMarked = function (x, y) {
+    function getIsMarked(x, y) {
         checkBounds(x, y);
         return marks[y * width + x] == 1;
-    };
+    }
 
-    this.getWidth = function () {
+    function getWidth() {
         return width;
-    };
+    }
 
-    this.getHeight = function () {
+    function getHeight() {
         return height;
-    };
+    }
 
     function checkBounds(x, y) {
         if (x >= width || x < 0 || y >= height || y < 0) {
             throw new Error("Cell " + x + ", " + y + " is out of bounds");
         }
     }
+
+    return {
+        getHeight: getHeight,
+        getWidth: getWidth,
+        getBiggestGroupsAmountInRows: getBiggestGroupsAmountInRows,
+        getBiggestGroupsAmountInCols: getBiggestGroupsAmountInCols,
+        getGroupsInCol: getGroupsInCol,
+        getGroupsInRow: getGroupsInRow,
+        getGuessedCellsAmount: getGuessedCellsAmount,
+        getTotalFilledCells: getTotalFilledCells,
+        getIsFilled: getIsFilled,
+        getIsMarked: getIsMarked,
+        getIsSolved: getIsSolved,
+        getMarkedGroupsInRow: getMarkedGroupsInRow,
+        getMarkedGroupsInCol: getMarkedGroupsInCol,
+        mark: mark
+    };
 };
