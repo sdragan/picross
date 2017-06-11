@@ -58,6 +58,16 @@ describe("Board", function () {
         expect(board.getGuessedCellsAmount()).toBe(9);
     });
 
+    it("should detect when the board is solved", function () {
+        expect(board.getIsSolved()).toBe(false);
+        board.mark(1, 0);
+        expect(board.getIsSolved()).toBe(false);
+        board = new lowfat.Board(BOARD_PRESET_WIDTH, BOARD_PRESET_HEIGHT, BOARD_PRESET, [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0]);
+        expect(board.getIsSolved()).toBe(false);
+        board.mark(3, 4);
+        expect(board.getIsSolved()).toBe(true);
+    });
+
     it("should return groups in row", function () {
         var expectedRow0 = [1, 1];
         var expectedRow1 = [];

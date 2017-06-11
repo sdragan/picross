@@ -154,6 +154,10 @@ lowfat.Board = function (cols, rows, elementsArray, marksArray) {
         return guessedCellsAmount;
     };
 
+    this.getIsSolved = function () {
+        return that.getGuessedCellsAmount() == that.getTotalFilledCells();
+    };
+
     this.mark = function (x, y) {
         checkBounds(x, y);
         if (this.getIsMarked(x, y) == true) {
