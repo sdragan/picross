@@ -7,6 +7,7 @@ lowfat.Board = function (cols, rows, elementsArray, marksArray) {
     var elements = elementsArray;
     var marks = initMarks(marksArray);
     var totalFilledCells = calculateTotalFilledCells();
+    var guessedCellsAmount = calculateInitialGuessedCellsAmount();
 
     function initMarks(marksArrayFromParams) {
         if (typeof marksArrayFromParams == "undefined" || marksArrayFromParams == null || marksArrayFromParams.length == 0) {
@@ -31,6 +32,22 @@ lowfat.Board = function (cols, rows, elementsArray, marksArray) {
             }
         }
         return result;
+    }
+
+    function calculateInitialGuessedCellsAmount() {
+        var result = 0;
+        for (var i = 0; i < elements.length; i++) {
+            if (elements[i] == 1 && marks[i] == 1) {
+                result++;
+            }
+        }
+        return result;
+    }
+
+    function checkGuessedCell(x, y) {
+        if (that.getIsFilled(x, y) && that.getIsMarked(x, y)) {
+            guessedCellsAmount++;
+        }
     }
 
     this.getGroupsInRow = function (row) {
@@ -133,12 +150,17 @@ lowfat.Board = function (cols, rows, elementsArray, marksArray) {
         return totalFilledCells;
     };
 
+    this.getGuessedCellsAmount = function () {
+        return guessedCellsAmount;
+    };
+
     this.mark = function (x, y) {
         checkBounds(x, y);
         if (this.getIsMarked(x, y) == true) {
             throw new Error("Cell " + x + ", " + y + " is already marked");
         }
         marks [y * width + x] = 1;
+        checkGuessedCell(x, y);
     };
 
     this.getIsFilled = function (x, y) {

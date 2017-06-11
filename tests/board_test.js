@@ -49,6 +49,15 @@ describe("Board", function () {
         expect(board.getTotalFilledCells()).toBe(12);
     });
 
+    it("should return amount of correctly guessed cells", function () {
+        expect(board.getGuessedCellsAmount()).toBe(0);
+        board.mark(1, 0);
+        board.mark(2, 4);
+        expect(board.getGuessedCellsAmount()).toBe(2);
+        board = new lowfat.Board(BOARD_PRESET_WIDTH, BOARD_PRESET_HEIGHT, BOARD_PRESET, [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0]);
+        expect(board.getGuessedCellsAmount()).toBe(9);
+    });
+
     it("should return groups in row", function () {
         var expectedRow0 = [1, 1];
         var expectedRow1 = [];
