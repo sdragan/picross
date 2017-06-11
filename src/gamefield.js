@@ -14,11 +14,12 @@ lowfat.Gamefield = function (scene, spriteFactory) {
     var boardContainer = null;
 
     function initVars() {
-        // var smallBoard4x5 = new lowfat.Board(4, 5, [0, 1, 0, 1, 0, 0, 0, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1, 1]);
-        // var boardHeart10x10 = new lowfat.Board(10, 10, [1, 1, 1, 0, 0, 1, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 1, 0, 1, 1, 1, 0, 0, 0, 0, 0, 1, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 0, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 0, 0, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0]);
-        var boardGlass8x8 = new lowfat.Board(8, 8, [0, 1, 1, 1, 1, 0, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1]);
+        var smallBoard4x5 = lowfat.Board(4, 5, [0, 1, 0, 1, 0, 0, 0, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1, 1]);
+        var boardDog5x5 = lowfat.Board(5, 5, [0, 0, 0, 1, 0, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 0, 1, 0, 1, 0, 0, 1, 0, 1, 0]);
+        var boardGlass8x8 = lowfat.Board(8, 8, [0, 1, 1, 1, 1, 0, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1]);
+        var boardHeart10x10 = lowfat.Board(10, 10, [1, 1, 1, 0, 0, 1, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 1, 0, 1, 1, 1, 0, 0, 0, 0, 0, 1, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 0, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 0, 0, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0]);
 
-        board = boardGlass8x8;
+        board = boardDog5x5;
         var boardSizeVO = new lowfat.BoardSizeVO(50, 14, 18, 2, 2, 0, 0, 0, 1.5);
         boardDimensions = new lowfat.BoardDimensions(cc.director.getWinSize(), board.getWidth(), board.getHeight(), board.getBiggestGroupsAmountInRows(), board.getBiggestGroupsAmountInCols(), boardSizeVO);
         livesLeft = 3;
@@ -31,6 +32,8 @@ lowfat.Gamefield = function (scene, spriteFactory) {
         container.addChild(boardContainer);
         boardContainer.setPosition(boardDimensions.getContainerLeftX(), boardDimensions.getContainerBottomY());
         boardContainer.setScale(boardDimensions.getScale(), boardDimensions.getScale());
+        boardContainer.setCascadeColorEnabled(true);
+        boardContainer.setCascadeOpacityEnabled(true);
     }
 
     function initControls() {
@@ -56,6 +59,8 @@ lowfat.Gamefield = function (scene, spriteFactory) {
     function drawLabels() {
         groupLabelsRows = [];
         groupLabelsCols = [];
+
+        board.getIsFilled();
 
         var groupsCount;
         var groups;
@@ -90,6 +95,23 @@ lowfat.Gamefield = function (scene, spriteFactory) {
         }
     }
 
+    function resetLabels() {
+        var i;
+        var u;
+        for (i = 0; i < groupLabelsCols.length; i++) {
+            for (u = 0; u < groupLabelsCols[i].length; u++) {
+                groupLabelsCols[i][u].setOpacity(255);
+                groupLabelsCols[i][u].setScale(1, 1);
+            }
+        }
+        for (i = 0; i < groupLabelsRows.length; i++) {
+            for (u = 0; u < groupLabelsRows[i].length; u++) {
+                groupLabelsRows[i][u].setOpacity(255);
+                groupLabelsRows[i][u].setScale(1, 1);
+            }
+        }
+    }
+
     this.start = function () {
         initVars();
         initLayers();
@@ -112,6 +134,9 @@ lowfat.Gamefield = function (scene, spriteFactory) {
             var newRowStatus = board.getMarkedGroupsInRow(cellY);
             revealRestOfColOrRowIfNecessary(cellX, cellY, newColStatus, newRowStatus);
             revealFilledCell(cellX, cellY);
+            if (board.getIsSolved()) {
+                levelWon();
+            }
         } else {
             revealMistake(cellX, cellY);
             controls.forceStopDrag();
@@ -122,12 +147,28 @@ lowfat.Gamefield = function (scene, spriteFactory) {
         }
     }
 
-    function levelLost() {
+    function levelWon() {
         controls.disable();
-        startBoardClearAnimation();
+        playShortLevelWonAnimation();
     }
 
-    function startBoardClearAnimation() {
+    function levelLost() {
+        controls.disable();
+        playLevelLostAnimation(resetLevel);
+    }
+
+    function restartLevelDuringPlay() {
+        controls.disable();
+        playBoardClearAnimation(resetLevel);
+    }
+
+    function resetLevel() {
+        initVars();
+        resetLabels();
+        controls.enable();
+    }
+
+    function playBoardClearAnimation(finishedCallback) {
         var totalDuration = 0.8;
         var gridContentLength = gridContentSprites.length;
         var partialDuration = totalDuration / gridContentLength;
@@ -141,30 +182,42 @@ lowfat.Gamefield = function (scene, spriteFactory) {
             var sequenceAction = new cc.Sequence(delayAction, scaleDownAction, disappearAction);
             cellContent.runAction(sequenceAction);
         }
-        boardContainer.runAction(new cc.Sequence(new cc.DelayTime(totalDuration), new cc.CallFunc(onBoardClearAnimationFinished)));
+        boardContainer.runAction(new cc.Sequence(new cc.DelayTime(totalDuration), new cc.CallFunc(finishedCallback)));
     }
 
-    function onBoardClearAnimationFinished() {
-        initVars();
-        resetGroupLabels();
-        controls.enable();
+    function playLevelLostAnimation() {
+        var duration = 1.5;
+        boardContainer.stopAllActions();
+        boardContainer.runAction(new cc.Spawn(cc.FadeTo(duration, 150), new cc.TintTo(duration, 150, 150, 150)));
     }
 
-    function resetGroupLabels() {
+    function playExitLevelAnimation(finishedCallback) {
+        var totalDuration = 0.5;
+        boardContainer.stopAllActions();
+        boardContainer.runAction(new cc.Sequence(new cc.FadeOut(totalDuration), new cc.CallFunc(finishedCallback)));
+    }
+
+    function onExitLevelAnimationFinished() {
         var i;
-        var u;
-        for (i = 0; i < groupLabelsCols.length; i++) {
-            for (u = 0; u < groupLabelsCols[i].length; u++) {
-                groupLabelsCols[i][u].setOpacity(255);
-                groupLabelsCols[i][u].setScale(1, 1);
-            }
+        for (i = 0; i < gridContentSprites.length; i++) {
+            gridContentSprites.removeFromParent();
         }
-        for (i = 0; i < groupLabelsRows.length; i++) {
-            for (u = 0; u < groupLabelsRows[i].length; u++) {
-                groupLabelsRows[i][u].setOpacity(255);
-                groupLabelsRows[i][u].setScale(1, 1);
-            }
+        for (i = 0; i < gridCellSprites.length; i++) {
+            gridCellSprites.removeFromParent();
         }
+        boardContainer.setOpacity(255);
+    }
+
+    function playShortLevelWonAnimation(finishedCallback) {
+        var gridContentLength = gridContentSprites.length;
+        for (var i = 0; i < gridContentLength; i++) {
+            var upScaleAction = new cc.ScaleTo(0.1, 1.1, 1.1).easing(cc.easeCubicActionOut());
+            var waitAction = new cc.DelayTime(0.15);
+            var scaleDownAction = new cc.ScaleTo(0.25, 1, 1).easing(cc.easeQuadraticActionOut());
+            var sequence = new cc.Sequence(upScaleAction, waitAction, scaleDownAction);
+            gridContentSprites[i].runAction(sequence);
+        }
+        boardContainer.runAction(new cc.Sequence(new cc.DelayTime(0.5), new cc.CallFunc(finishedCallback)));
     }
 
     function revealFilledCell(cellX, cellY) {
