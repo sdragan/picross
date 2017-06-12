@@ -14,6 +14,14 @@ lowfat.PostLevelMenu = function (container, screenSizeInPoints, spriteFactory) {
         overlayContainer.addChild(overlay);
     }
 
+    function showOverlay() {
+        overlay.setVisible(true);
+    }
+
+    function hideOverlay() {
+
+    }
+
     function createButton(outSkin, overSkin, x, y, onTriggeredEvent) {
         var button = new ccui.Button();
         var outSkinTextureName = spriteFactory.getMCTextureName(outSkin);
@@ -24,10 +32,20 @@ lowfat.PostLevelMenu = function (container, screenSizeInPoints, spriteFactory) {
         return button;
     }
 
-    function onResize (screenSizeInPoints) {
+    function showWon() {
+        console.log("postLevel win menu");
+    }
+
+    function showLost() {
+        console.log("postLevel lost menu");
+    }
+
+    function onResize(screenSizeInPoints) {
     }
 
     return {
-        onResize: onResize
+        onResize: onResize,
+        showLost: showLost,
+        showWon: showWon
     }
 };

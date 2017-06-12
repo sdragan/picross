@@ -12,6 +12,8 @@ lowfat.Gamefield = function (scene, spriteFactory) {
     var livesLeft;
     var bgGradient = null;
     var boardContainer = null;
+    var menuContainer = null;
+    var postLevelMenu = null;
 
     function initVars() {
         var smallBoard4x5 = lowfat.Board(4, 5, [0, 1, 0, 1, 0, 0, 0, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1, 1]);
@@ -34,6 +36,9 @@ lowfat.Gamefield = function (scene, spriteFactory) {
         boardContainer.setScale(boardDimensions.getScale(), boardDimensions.getScale());
         boardContainer.setCascadeColorEnabled(true);
         boardContainer.setCascadeOpacityEnabled(true);
+        menuContainer = new cc.Node();
+        container.addChild(menuContainer);
+        postLevelMenu = lowfat.PostLevelMenu(menuContainer,  cc.director.getWinSize(), spriteFactory);
     }
 
     function initControls() {
@@ -147,14 +152,14 @@ lowfat.Gamefield = function (scene, spriteFactory) {
         }
     }
 
-    function levelWon() {
-        controls.disable();
-        playShortLevelWonAnimation();
-    }
-
     function levelLost() {
         controls.disable();
-        playLevelLostAnimation(resetLevel);
+        grayBoardOut(onGrayBoardOutFinished);
+    }
+
+    function levelWon() {
+        controls.disable();
+        playShortLevelWonAnimation(onShortLevelWonAnimationFinished);
     }
 
     function restartLevelDuringPlay() {
@@ -185,10 +190,23 @@ lowfat.Gamefield = function (scene, spriteFactory) {
         boardContainer.runAction(new cc.Sequence(new cc.DelayTime(totalDuration), new cc.CallFunc(finishedCallback)));
     }
 
-    function playLevelLostAnimation() {
+    function grayBoardOut(finishedCallback) {
         var duration = 1.5;
         boardContainer.stopAllActions();
-        boardContainer.runAction(new cc.Spawn(cc.FadeTo(duration, 150), new cc.TintTo(duration, 150, 150, 150)));
+        var boardFadeSpawn = new cc.Spawn(new cc.FadeTo(duration, 150), new cc.TintTo(duration, 100, 100, 100));
+        var callFuncAction = new cc.CallFunc(finishedCallback);
+        boardContainer.runAction(new cc.Sequence(boardFadeSpawn, callFuncAction));
+    }
+
+    function onGrayBoardOutFinished() {
+        postLevelMenu.showLost();
+    }
+
+    function ungrayBoardOut() {
+        var duration = 1.5;
+        boardContainer.stopAllActions();
+        var boardUnfadeSpawn = new cc.Spawn(cc.FadeTo(duration, 255), new cc.TintTo(duration, 255, 255, 255));
+
     }
 
     function playExitLevelAnimation(finishedCallback) {
@@ -218,6 +236,10 @@ lowfat.Gamefield = function (scene, spriteFactory) {
             gridContentSprites[i].runAction(sequence);
         }
         boardContainer.runAction(new cc.Sequence(new cc.DelayTime(0.5), new cc.CallFunc(finishedCallback)));
+    }
+
+    function onShortLevelWonAnimationFinished() {
+        postLevelMenu.showWon();
     }
 
     function revealFilledCell(cellX, cellY) {
