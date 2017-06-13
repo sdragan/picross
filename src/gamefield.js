@@ -38,7 +38,7 @@ lowfat.Gamefield = function (scene, spriteFactory) {
         boardContainer.setCascadeOpacityEnabled(true);
         menuContainer = new cc.Node();
         container.addChild(menuContainer);
-        postLevelMenu = lowfat.PostLevelMenu(menuContainer,  cc.director.getWinSize(), spriteFactory);
+        postLevelMenu = lowfat.PostLevelMenu(menuContainer,  cc.director.getWinSize(), spriteFactory, restartLevelAfterLost);
     }
 
     function initControls() {
@@ -167,6 +167,11 @@ lowfat.Gamefield = function (scene, spriteFactory) {
         playBoardClearAnimation(resetLevel);
     }
 
+    function restartLevelAfterLost() {
+        ungrayBoardOut();
+        playBoardClearAnimation(resetLevel);
+    }
+
     function resetLevel() {
         initVars();
         resetLabels();
@@ -205,8 +210,8 @@ lowfat.Gamefield = function (scene, spriteFactory) {
     function ungrayBoardOut() {
         var duration = 1.5;
         boardContainer.stopAllActions();
-        var boardUnfadeSpawn = new cc.Spawn(cc.FadeTo(duration, 255), new cc.TintTo(duration, 255, 255, 255));
-
+        var boardUnfadeSpawn = new cc.Spawn(new cc.FadeTo(duration, 255), new cc.TintTo(duration, 255, 255, 255));
+        boardContainer.runAction(boardUnfadeSpawn);
     }
 
     function playExitLevelAnimation(finishedCallback) {
