@@ -42,7 +42,7 @@ lowfat.Gamefield = function (scene, spriteFactory) {
     }
 
     function initControls() {
-        controls = new lowfat.TouchControls(scene, boardDimensions, selectCell);
+        controls = lowfat.TouchControls(scene, boardDimensions, selectCell);
         controls.enable();
     }
 
@@ -117,13 +117,13 @@ lowfat.Gamefield = function (scene, spriteFactory) {
         }
     }
 
-    this.start = function () {
+    function start() {
         initVars();
         initLayers();
         initControls();
         drawBoard();
         drawLabels();
-    };
+    }
 
     function selectCell(cellX, cellY) {
         if (board.getIsMarked(cellX, cellY)) {
@@ -337,11 +337,11 @@ lowfat.Gamefield = function (scene, spriteFactory) {
         }
     }
 
-    this.onResize = function (screenSizeInPoints) {
+    function onResize(screenSizeInPoints) {
         boardDimensions.resize(screenSizeInPoints);
         bgGradient.setContentSize(screenSizeInPoints.width, screenSizeInPoints.height);
         boardContainer.setPositionX(boardDimensions.getContainerLeftX());
-    };
+    }
 
     function allElementsOfArrayAreEqualTo(arr, value) {
         for (var i = 0; i < arr.length; i++) {
@@ -351,28 +351,32 @@ lowfat.Gamefield = function (scene, spriteFactory) {
         }
         return true;
     }
+
+    return {
+        start: start,
+        onResize: onResize
+    }
 };
 
 lowfat.TouchControls = function (scene, boardDimensions, selectCellCallback) {
     var touchStarted = false;
     var enabled = false;
-    var that = this;
 
-    this.enable = function () {
+    function enable() {
         if (enabled) {
             throw new Error("Trying to enable controls, but they are already enabled");
         }
         enabled = true;
         addListeners();
-    };
+    }
 
-    this.disable = function () {
+    function disable() {
         if (!enabled) {
             throw new Error("Trying to disable controls, but they are already disabled");
         }
         enabled = false;
         removeListeners();
-    };
+    }
 
     function addListeners() {
         cc.eventManager.addListener({
@@ -395,9 +399,9 @@ lowfat.TouchControls = function (scene, boardDimensions, selectCellCallback) {
         cc.eventManager.removeListeners(cc.EventListener.TOUCH_ONE_BY_ONE);
     }
 
-    this.forceStopDrag = function () {
+    function forceStopDrag() {
         touchStarted = false;
-    };
+    }
 
     function processTouchStarted(touchX, touchY) {
         if (!boardDimensions.getIsInsideBoard(touchX, touchY)) {
@@ -414,7 +418,7 @@ lowfat.TouchControls = function (scene, boardDimensions, selectCellCallback) {
         }
 
         if (!boardDimensions.getIsInsideBoard(touchX, touchY)) {
-            that.forceStopDrag();
+            forceStopDrag();
             return;
         }
 
@@ -427,5 +431,11 @@ lowfat.TouchControls = function (scene, boardDimensions, selectCellCallback) {
         }
 
         touchStarted = false;
+    }
+
+    return {
+        enable: enable,
+        disable: disable,
+        forceStopDrag: forceStopDrag
     }
 };
