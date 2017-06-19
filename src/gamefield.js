@@ -21,7 +21,7 @@ lowfat.Gamefield = function (scene, spriteFactory) {
         var boardGlass8x8 = lowfat.Board(8, 8, [0, 1, 1, 1, 1, 0, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1]);
         var boardHeart10x10 = lowfat.Board(10, 10, [1, 1, 1, 0, 0, 1, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 1, 0, 1, 1, 1, 0, 0, 0, 0, 0, 1, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 0, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 0, 0, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0]);
 
-        board = boardDog5x5;
+        board = smallBoard4x5;
         var boardSizeVO = new lowfat.BoardSizeVO(50, 14, 18, 2, 2, 0, 0, 0, 1.5);
         boardDimensions = new lowfat.BoardDimensions(cc.director.getWinSize(), board.getWidth(), board.getHeight(), board.getBiggestGroupsAmountInRows(), board.getBiggestGroupsAmountInCols(), boardSizeVO);
         livesLeft = 3;
@@ -273,7 +273,7 @@ lowfat.Gamefield = function (scene, spriteFactory) {
         var waitAction = new cc.DelayTime(0.15);
         var scaleDownAction = new cc.ScaleTo(0.25, 1, 1).easing(cc.easeQuadraticActionOut());
         var sequence;
-        if (typeof delay != "undefined" && delay != null) {
+        if (typeof delay != "undefined" && delay) {
             var delayAction = new cc.DelayTime(delay);
             sequence = new cc.Sequence(delayAction, upScaleAction, waitAction, scaleDownAction);
         } else {
