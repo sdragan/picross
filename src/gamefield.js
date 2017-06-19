@@ -232,9 +232,13 @@ lowfat.Gamefield = function (scene, spriteFactory) {
     }
 
     function playShortLevelWonAnimation(finishedCallback) {
+        boardContainer.runAction(new cc.Sequence(new cc.DelayTime(0.8), new cc.CallFunc(playShortLevelWonAnimationStep2, null, finishedCallback)));
+    }
+
+    function playShortLevelWonAnimationStep2(target, finishedCallback) {
         var gridContentLength = gridContentSprites.length;
         for (var i = 0; i < gridContentLength; i++) {
-            var upScaleAction = new cc.ScaleTo(0.1, 1.1, 1.1).easing(cc.easeCubicActionOut());
+            var upScaleAction = new cc.ScaleTo(0.1, 1.05, 1.05).easing(cc.easeCubicActionOut());
             var waitAction = new cc.DelayTime(0.15);
             var scaleDownAction = new cc.ScaleTo(0.25, 1, 1).easing(cc.easeQuadraticActionOut());
             var sequence = new cc.Sequence(upScaleAction, waitAction, scaleDownAction);
