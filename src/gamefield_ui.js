@@ -8,7 +8,6 @@ lowfat.PostLevelMenu = function (container, screenSizeInPoints, spriteFactory, r
     var retryButton;
 
     var selectedCallback;
-    var restartCallback;
 
     init();
 
@@ -89,5 +88,12 @@ lowfat.PostLevelMenu = function (container, screenSizeInPoints, spriteFactory, r
         onResize: onResize,
         showLost: showLost,
         showWon: showWon
+    }
+};
+
+lowfat.LivesPanel = function (container, screenSizeInPoints, spriteFactory) {
+
+    function setInitialLives(count) {
+
     }
 };
