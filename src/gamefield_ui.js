@@ -92,8 +92,43 @@ lowfat.PostLevelMenu = function (container, screenSizeInPoints, spriteFactory, r
 };
 
 lowfat.LivesPanel = function (container, screenSizeInPoints, spriteFactory) {
+    var icons = [];
+    var livesCount = 3;
+
+    function displayLifeIcons() {
+        for (var i = 0; i < livesCount; i++) {
+            var icon;
+            if (icons.length <= i) {
+                icon = spriteFactory.getSprite("LifeIcon");
+                icons.push(icon);
+                container.addChild(icon);
+            } else {
+                icon = icons[i];
+                var delayAction = new cc.DelayTime(i * 0.05);
+                var fadeInAction = new cc.FadeIn(0.1);
+                icon.runAction(new cc.Sequence(delayAction, fadeInAction));
+            }
+            icon.setPosition((screenSizeInPoints.width / 2) + 40 * (-1 + i), 680);
+        }
+    }
 
     function setInitialLives(count) {
+        livesCount = count;
+        displayLifeIcons();
+    }
 
+    function decrementLife() {
+        livesCount--;
+        fadeLifeIcon(icons[livesCount]);
+    }
+
+    function fadeLifeIcon(icon) {
+        var fadeAction = new cc.FadeOut(0.5);
+        icon.runAction(fadeAction);
+    }
+
+    return {
+        setInitialLives: setInitialLives,
+        decrementLife: decrementLife
     }
 };

@@ -1,6 +1,6 @@
 var lowfat = lowfat || {};
 
-lowfat.Gamefield = function (scene, spriteFactory) {
+lowfat.Gamefield = function (scene, spriteFactory, screenSize) {
     var container = scene;
     var board = null;
     var boardDimensions = null;
@@ -12,8 +12,11 @@ lowfat.Gamefield = function (scene, spriteFactory) {
     var livesLeft;
     var bgGradient = null;
     var boardContainer = null;
+    var uiContainer = null;
     var menuContainer = null;
     var postLevelMenu = null;
+    var livesPanel = null;
+    var screenSizeInPoints = screenSize;
 
     function initVars() {
         var smallBoard4x5 = lowfat.Board(4, 5, [0, 1, 0, 1, 0, 0, 0, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1, 1]);
@@ -23,7 +26,7 @@ lowfat.Gamefield = function (scene, spriteFactory) {
 
         board = smallBoard4x5;
         var boardSizeVO = new lowfat.BoardSizeVO(50, 14, 18, 2, 2, 0, 0, 0, 1.5);
-        boardDimensions = new lowfat.BoardDimensions(cc.director.getWinSize(), board.getWidth(), board.getHeight(), board.getBiggestGroupsAmountInRows(), board.getBiggestGroupsAmountInCols(), boardSizeVO);
+        boardDimensions = new lowfat.BoardDimensions(screenSizeInPoints, board.getWidth(), board.getHeight(), board.getBiggestGroupsAmountInRows(), board.getBiggestGroupsAmountInCols(), boardSizeVO);
         livesLeft = 3;
     }
 
@@ -38,7 +41,11 @@ lowfat.Gamefield = function (scene, spriteFactory) {
         boardContainer.setCascadeOpacityEnabled(true);
         menuContainer = new cc.Node();
         container.addChild(menuContainer);
-        postLevelMenu = lowfat.PostLevelMenu(menuContainer,  cc.director.getWinSize(), spriteFactory, restartLevelAfterLost);
+        postLevelMenu = lowfat.PostLevelMenu(menuContainer,  screenSizeInPoints, spriteFactory, restartLevelAfterLost);
+        uiContainer = new cc.Node();
+        container.addChild(uiContainer);
+        livesPanel = lowfat.LivesPanel(uiContainer, screenSizeInPoints, spriteFactory);
+        livesPanel.setInitialLives(3);
     }
 
     function initControls() {
@@ -146,6 +153,7 @@ lowfat.Gamefield = function (scene, spriteFactory) {
             revealMistake(cellX, cellY);
             controls.forceStopDrag();
             livesLeft--;
+            livesPanel.decrementLife();
             if (livesLeft <= 0) {
                 levelLost();
             }
@@ -175,6 +183,7 @@ lowfat.Gamefield = function (scene, spriteFactory) {
     function resetLevel() {
         initVars();
         resetLabels();
+        livesPanel.setInitialLives(3);
         controls.enable();
     }
 
@@ -337,7 +346,8 @@ lowfat.Gamefield = function (scene, spriteFactory) {
         }
     }
 
-    function onResize(screenSizeInPoints) {
+    function onResize(screenSize) {
+        screenSizeInPoints = screenSize;
         boardDimensions.resize(screenSizeInPoints);
         bgGradient.setContentSize(screenSizeInPoints.width, screenSizeInPoints.height);
         boardContainer.setPositionX(boardDimensions.getContainerLeftX());
