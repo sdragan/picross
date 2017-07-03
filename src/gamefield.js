@@ -41,11 +41,14 @@ lowfat.Gamefield = function (scene, spriteFactory, screenSize) {
         boardContainer.setCascadeOpacityEnabled(true);
         menuContainer = new cc.Node();
         container.addChild(menuContainer);
-        postLevelMenu = lowfat.PostLevelMenu(menuContainer,  screenSizeInPoints, spriteFactory, restartLevelAfterLost);
+        postLevelMenu = lowfat.PostLevelMenu(menuContainer,  screenSizeInPoints, spriteFactory, restartLevelAfterLost, backToMenuAfterLevel);
         uiContainer = new cc.Node();
         container.addChild(uiContainer);
         livesPanel = lowfat.LivesPanel(uiContainer, screenSizeInPoints, spriteFactory);
         livesPanel.setInitialLives(3);
+
+        var thumbnail = lowfat.LevelThumbnail(spriteFactory, 4, 5, [0, 1, 0, 1, 0, 0, 0, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1, 1]);
+        thumbnail.addToParent(container);
     }
 
     function initControls() {
@@ -257,7 +260,11 @@ lowfat.Gamefield = function (scene, spriteFactory, screenSize) {
     }
 
     function onShortLevelWonAnimationFinished() {
-        postLevelMenu.showWon();
+        postLevelMenu.showWon(livesLeft);
+    }
+
+    function backToMenuAfterLevel() {
+        console.log("Back to menu");
     }
 
     function revealFilledCell(cellX, cellY) {
