@@ -17,11 +17,10 @@ lowfat.LevelThumbnail = function (spriteFactory, cols, rows, elementsArray) {
 
         for (var col = 0; col < cols; col++) {
             for (var row = 0; row < rows; row++) {
-                if (getIsFilled(col, row)) {
-                    var filledCell = spriteFactory.getSprite("LevelThumbnailFilledCell");
-                    filledCell.setPosition(cellSize / 2 + cellSize * col, cellSize * rows - cellSize * row - cellSize / 2);
-                    thumbnailNode.addChild(filledCell);
-                }
+                var spriteName = getIsFilled(col, row) ? "LevelThumbnailFilledCell" : "LevelThumbnailEmptyCell";
+                var cellContent = spriteFactory.getSprite(spriteName);
+                cellContent.setPosition(cellSize / 2 + cellSize * col, cellSize * rows - cellSize * row - cellSize / 2);
+                thumbnailNode.addChild(cellContent);
             }
         }
     }
