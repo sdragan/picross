@@ -2,6 +2,7 @@ var lowfat = lowfat || {};
 
 lowfat.Gamefield = function (scene, spriteFactory, screenSize) {
     var container = scene;
+    var boardInfo = null;
     var board = null;
     var boardDimensions = null;
     var groupLabelsRows = null;
@@ -18,16 +19,12 @@ lowfat.Gamefield = function (scene, spriteFactory, screenSize) {
     var livesPanel = null;
     var screenSizeInPoints = screenSize;
 
-    function initVars() {
-        var smallBoard4x5 = lowfat.Board(4, 5, [0, 1, 0, 1, 0, 0, 0, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1, 1]);
-        var boardDog5x5 = lowfat.Board(5, 5, [0, 0, 0, 1, 0, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 0, 1, 0, 1, 0, 0, 1, 0, 1, 0]);
-        var boardGlass8x8 = lowfat.Board(8, 8, [0, 1, 1, 1, 1, 0, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1]);
-        var boardHeart10x10 = lowfat.Board(10, 10, [1, 1, 1, 0, 0, 1, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 1, 0, 1, 1, 1, 0, 0, 0, 0, 0, 1, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 0, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 0, 0, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0]);
-
-        board = smallBoard4x5;
+    function initVars(boardInfoParam, initialMarkedCells, initialMistakenlyMarkedCellsIndexes, initialLivesLeft) {
+        boardInfo = boardInfoParam;
+        board = lowfat.Board(boardInfo.getCols(), boardInfo.getRows(), boardInfo.getElementsArray(), initialMarkedCells, initialMistakenlyMarkedCellsIndexes);
+        livesLeft = initialLivesLeft;
         var boardSizeVO = new lowfat.BoardSizeVO(50, 14, 18, 2, 2, 0, 0, 0, 1.5);
         boardDimensions = new lowfat.BoardDimensions(screenSizeInPoints, board.getWidth(), board.getHeight(), board.getBiggestGroupsAmountInRows(), board.getBiggestGroupsAmountInCols(), boardSizeVO);
-        livesLeft = 3;
     }
 
     function initLayers() {
@@ -41,14 +38,11 @@ lowfat.Gamefield = function (scene, spriteFactory, screenSize) {
         boardContainer.setCascadeOpacityEnabled(true);
         menuContainer = new cc.Node();
         container.addChild(menuContainer);
-        postLevelMenu = lowfat.PostLevelMenu(menuContainer,  screenSizeInPoints, spriteFactory, restartLevelAfterLost, backToMenuAfterLevel);
+        postLevelMenu = lowfat.PostLevelMenu(menuContainer, screenSizeInPoints, spriteFactory, restartLevelAfterLost, backToMenuAfterLevel);
         uiContainer = new cc.Node();
         container.addChild(uiContainer);
         livesPanel = lowfat.LivesPanel(uiContainer, screenSizeInPoints, spriteFactory);
-        livesPanel.setInitialLives(3);
-
-        var thumbnail = lowfat.LevelThumbnail(spriteFactory, 4, 5, [0, 1, 0, 1, 0, 0, 0, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1, 1]);
-        thumbnail.addToParent(container);
+        livesPanel.setInitialLives(livesLeft);
     }
 
     function initControls() {
@@ -66,7 +60,17 @@ lowfat.Gamefield = function (scene, spriteFactory, screenSize) {
                 boardContainer.addChild(gridCell);
                 gridCellSprites.push(gridCell);
 
-                // showCellContent(col, row, board.getIsFilled(col, row) ? "CellFilled" : "CellEmptySmall");
+                if (board.getIsMarked(col, row)) {
+                    if (board.getIsFilled(col, row)) {
+                        revealFilledCell(col, row);
+                    } else {
+                        if (board.getIsMistakenlyMarked(col, row)) {
+                            revealMistake(col, row);
+                        } else {
+                            revealEmptyCell(col, row);
+                        }
+                    }
+                }
             }
         }
     }
@@ -110,6 +114,11 @@ lowfat.Gamefield = function (scene, spriteFactory, screenSize) {
         }
     }
 
+    function resetBoardAndLives() {
+        board = lowfat.Board(boardInfo.getCols(), boardInfo.getRows(), boardInfo.getElementsArray());
+        livesLeft = 3;
+    }
+
     function resetLabels() {
         var i;
         var u;
@@ -127,8 +136,8 @@ lowfat.Gamefield = function (scene, spriteFactory, screenSize) {
         }
     }
 
-    function start() {
-        initVars();
+    function start(boardInfoParam, initialMarkedCells, initialMistakenlyMarkedCellsIndexes, initialLivesLeft) {
+        initVars(boardInfoParam, initialMarkedCells, initialMistakenlyMarkedCellsIndexes, initialLivesLeft);
         initLayers();
         initControls();
         drawBoard();
@@ -184,7 +193,7 @@ lowfat.Gamefield = function (scene, spriteFactory, screenSize) {
     }
 
     function resetLevel() {
-        initVars();
+        resetBoardAndLives();
         resetLabels();
         livesPanel.setInitialLives(3);
         controls.enable();

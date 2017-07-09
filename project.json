@@ -19,6 +19,7 @@
         "src/gamefield_ui.js",
         "src/board.js",
         "src/board_dimensions.js",
-        "src/level_select.js"
+        "src/level_select.js",
+        "src/game_state.js"
     ]
 }

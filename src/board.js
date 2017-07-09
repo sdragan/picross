@@ -1,12 +1,33 @@
 var lowfat = lowfat || {};
 
-lowfat.Board = function (cols, rows, elementsArray, marksArray) {
+lowfat.BoardInfo = function (cols, rows, elementsArray) {
+    function getCols() {
+        return cols;
+    }
+
+    function getRows() {
+        return rows;
+    }
+
+    function getElementsArray() {
+        return elementsArray;
+    }
+
+    return {
+        getCols: getCols,
+        getRows: getRows,
+        getElementsArray: getElementsArray
+    }
+};
+
+lowfat.Board = function (cols, rows, elementsArray, marksArray, mistakenlyMarkedCellIndexesArray) {
     var width = cols;
     var height = rows;
     var elements = elementsArray;
     var marks = initMarks(marksArray);
     var totalFilledCells = calculateTotalFilledCells();
     var guessedCellsAmount = calculateInitialGuessedCellsAmount();
+    var mistakenlyMarkedCellIndexes = initMistakenlyMarkedCellIndexes(mistakenlyMarkedCellIndexesArray);
 
     function initMarks(marksArrayFromParams) {
         if (typeof marksArrayFromParams == "undefined" || marksArrayFromParams == null || marksArrayFromParams.length == 0) {
@@ -41,6 +62,13 @@ lowfat.Board = function (cols, rows, elementsArray, marksArray) {
             }
         }
         return result;
+    }
+
+    function initMistakenlyMarkedCellIndexes(mistakenlyMarkedCellIndexesFromParams) {
+        if (typeof mistakenlyMarkedCellIndexesFromParams == "undefined" || mistakenlyMarkedCellIndexesFromParams == null || mistakenlyMarkedCellIndexesFromParams.length == 0) {
+            return [];
+        }
+        return mistakenlyMarkedCellIndexesFromParams;
     }
 
     function checkGuessedCell(x, y) {
@@ -162,18 +190,25 @@ lowfat.Board = function (cols, rows, elementsArray, marksArray) {
         if (this.getIsMarked(x, y) == true) {
             throw new Error("Cell " + x + ", " + y + " is already marked");
         }
-        marks [y * width + x] = 1;
+        if (this.getIsFilled(x, y) == false) {
+            mistakenlyMarkedCellIndexes.push(getCellIndex(x, y));
+        }
+        marks [getCellIndex(x, y)] = 1;
         checkGuessedCell(x, y);
     }
 
     function getIsFilled(x, y) {
         checkBounds(x, y);
-        return elements[y * width + x] == 1;
+        return elements[getCellIndex(x, y)] == 1;
     }
 
     function getIsMarked(x, y) {
         checkBounds(x, y);
-        return marks[y * width + x] == 1;
+        return marks[getCellIndex(x, y)] == 1;
+    }
+
+    function getIsMistakenlyMarked(x, y) {
+        return mistakenlyMarkedCellIndexes.indexOf(getCellIndex(x, y)) >= 0;
     }
 
     function getWidth() {
@@ -190,6 +225,10 @@ lowfat.Board = function (cols, rows, elementsArray, marksArray) {
         }
     }
 
+    function getCellIndex(x, y) {
+        return y * width + x;
+    }
+
     return {
         getHeight: getHeight,
         getWidth: getWidth,
@@ -201,6 +240,7 @@ lowfat.Board = function (cols, rows, elementsArray, marksArray) {
         getTotalFilledCells: getTotalFilledCells,
         getIsFilled: getIsFilled,
         getIsMarked: getIsMarked,
+        getIsMistakenlyMarked: getIsMistakenlyMarked,
         getIsSolved: getIsSolved,
         getMarkedGroupsInRow: getMarkedGroupsInRow,
         getMarkedGroupsInCol: getMarkedGroupsInCol,

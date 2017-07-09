@@ -1,5 +1,15 @@
 var lowfat = lowfat || {};
 
+lowfat.LevelSelectMenu = function (spriteFactory) {
+
+    /*
+     var thumbnail = lowfat.LevelThumbnail(spriteFactory, 4, 5, [0, 1, 0, 1, 0, 0, 0, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1, 1]);
+     thumbnail.addToParent(container);
+     */
+
+    return {}
+};
+
 lowfat.LevelThumbnail = function (spriteFactory, cols, rows, elementsArray) {
     var cellSize = 24;
     var bgSize = 48;
