@@ -1,7 +1,8 @@
 var lowfat = lowfat || {};
 
-lowfat.Gamefield = function (scene, spriteFactory, screenSize) {
+lowfat.Gamefield = function (scene, spriteFactory, gameStateModel, screenSize) {
     var container = scene;
+    var levelName = null;
     var boardInfo = null;
     var board = null;
     var boardDimensions = null;
@@ -19,7 +20,8 @@ lowfat.Gamefield = function (scene, spriteFactory, screenSize) {
     var livesPanel = null;
     var screenSizeInPoints = screenSize;
 
-    function initVars(boardInfoParam, initialMarkedCells, initialMistakenlyMarkedCellsIndexes, initialLivesLeft) {
+    function initVars(levelNameParam, boardInfoParam, initialMarkedCells, initialMistakenlyMarkedCellsIndexes, initialLivesLeft) {
+        levelName = levelNameParam;
         boardInfo = boardInfoParam;
         board = lowfat.Board(boardInfo.getCols(), boardInfo.getRows(), boardInfo.getElementsArray(), initialMarkedCells, initialMistakenlyMarkedCellsIndexes);
         livesLeft = initialLivesLeft;
@@ -136,8 +138,8 @@ lowfat.Gamefield = function (scene, spriteFactory, screenSize) {
         }
     }
 
-    function start(boardInfoParam, initialMarkedCells, initialMistakenlyMarkedCellsIndexes, initialLivesLeft) {
-        initVars(boardInfoParam, initialMarkedCells, initialMistakenlyMarkedCellsIndexes, initialLivesLeft);
+    function start(levelNameParam, boardInfoParam, initialMarkedCells, initialMistakenlyMarkedCellsIndexes, initialLivesLeft) {
+        initVars(levelNameParam, boardInfoParam, initialMarkedCells, initialMistakenlyMarkedCellsIndexes, initialLivesLeft);
         initLayers();
         initControls();
         drawBoard();
@@ -170,6 +172,8 @@ lowfat.Gamefield = function (scene, spriteFactory, screenSize) {
                 levelLost();
             }
         }
+
+        gameStateModel.saveFromBoard(levelName, board.getMarkedCells(), board.getMistakenlyMarkedCells(), livesLeft)
     }
 
     function levelLost() {

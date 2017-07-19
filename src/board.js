@@ -229,6 +229,14 @@ lowfat.Board = function (cols, rows, elementsArray, marksArray, mistakenlyMarked
         return y * width + x;
     }
 
+    function getMarkedCells() {
+        return marks;
+    }
+
+    function getMistakenlyMarkedCells() {
+        return mistakenlyMarkedCellIndexes;
+    }
+
     return {
         getHeight: getHeight,
         getWidth: getWidth,
@@ -244,6 +252,8 @@ lowfat.Board = function (cols, rows, elementsArray, marksArray, mistakenlyMarked
         getIsSolved: getIsSolved,
         getMarkedGroupsInRow: getMarkedGroupsInRow,
         getMarkedGroupsInCol: getMarkedGroupsInCol,
+        getMarkedCells: getMarkedCells,
+        getMistakenlyMarkedCells: getMistakenlyMarkedCells,
         mark: mark
     };
 };
