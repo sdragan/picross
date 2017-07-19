@@ -14,7 +14,10 @@ lowfat.LevelSelectMenu = function (container, spriteFactory, gameStateModel, lev
     }
 
     function initThumbnails() {
-        var thumbnail = lowfat.LevelThumbnail(spriteFactory, 4, 5, [0, 1, 0, 1, 0, 0, 0, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1, 1]);
+        var levelName = "boardDog5x5";
+        var boardInfo = levelsModel.getBoardInfoByLevelName(levelName);
+        var levelState = gameStateModel.getLevelStateByLevelName(levelName);
+        var thumbnail = lowfat.LevelThumbnail(spriteFactory, boardInfo, levelName, levelState);
         thumbnail.addToParent(thumbnailsContainer);
         thumbnail.setPosition(10, 10);
     }
@@ -35,15 +38,23 @@ lowfat.LevelSelectMenu = function (container, spriteFactory, gameStateModel, lev
     }
 };
 
-lowfat.LevelThumbnail = function (spriteFactory, cols, rows, elementsArray, isLocked) {
+lowfat.LevelThumbnail = function (spriteFactory, boardInfo, levelName, state) {
     var cellSize = 24;
     var bgSize = 48;
-    var thumbnailNode = new cc.Node();
 
-    if (typeof(isLocked) === "undefined" || !isLocked) {
+    var cols = boardInfo.getCols();
+    var rows = boardInfo.getRows();
+    var elementsArray = boardInfo.getElementsArray();
+
+    var thumbnailNode = new cc.Node();
+    var isMouseOver = false;
+
+    if (state > 0) {
         drawUnlocked();
-    } else {
+    } else if (state < 0) {
         drawLocked();
+    } else {
+        drawAvailableButNotWon();
     }
 
     function drawLocked() {
@@ -73,6 +84,10 @@ lowfat.LevelThumbnail = function (spriteFactory, cols, rows, elementsArray, isLo
         }
     }
 
+    function drawAvailableButNotWon() {
+
+    }
+
     function addToParent(parent) {
         parent.addChild(thumbnailNode);
     }
@@ -93,10 +108,39 @@ lowfat.LevelThumbnail = function (spriteFactory, cols, rows, elementsArray, isLo
         return rows * cellSize;
     }
 
+    function processMouseMove(eventX, eventY) {
+        if (eventHitsNode(eventX, eventY)) {
+            if (!isMouseOver) {
+
+            }
+        } else {
+            if (isMouseOver) {
+
+            }
+        }
+    }
+
+    function processMouseClick(eventX, eventY) {
+        if (eventHitsNode(eventX, eventY)) {
+            console.log("Selected level " + levelName);
+        }
+    }
+
+    function eventHitsNode(eventX, eventY) {
+        if (eventX > thumbnailNode.getPositionX() && eventX < thumbnailNode.getPositionX() + cols * cellSize) {
+            if (eventY > thumbnailNode.getPositionY() && eventY < thumbnailNode.getPositionY() + rows * cellSize) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     return {
         addToParent: addToParent,
         setPosition: setPosition,
         getWidth: getWidth,
-        getHeight: getHeight
+        getHeight: getHeight,
+        processMouseMove: processMouseMove,
+        processMouseClick: processMouseClick
     }
 };

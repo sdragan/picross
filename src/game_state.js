@@ -100,7 +100,7 @@ lowfat.GameStateModel = function () {
         cc.sys.localStorage.setItem(LOCAL_STORAGE_ID_LEVELS_STATE, jsonLevelsState);
     }
 
-    function getStateForLevel(levelName) {
+    function getLevelStateByLevelName(levelName) {
         return levelsState[levelName];
     }
 
@@ -109,7 +109,7 @@ lowfat.GameStateModel = function () {
         saveFromBoard: saveFromBoard,
         saveFromLevelSelect: saveFromLevelSelect,
         setLevelStatus: setLevelStatus,
-        getStateForLevel: getStateForLevel
+        getLevelStateByLevelName: getLevelStateByLevelName
     }
 };
 
