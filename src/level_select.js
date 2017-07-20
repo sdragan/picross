@@ -1,9 +1,11 @@
 var lowfat = lowfat || {};
 
-lowfat.LevelSelectMenu = function (container, spriteFactory, gameStateModel, levelsModel, screenSize) {
+lowfat.LevelSelectMenu = function (container, spriteFactory, gameStateModel, levelsModel, startBoardCallback, startBoardContext, screenSize) {
     var thumbnailsContainer = null;
     var screenSizeInPoints = screenSize;
     var bgGradient = null;
+    var touchControls = null;
+    var thumbnail = null;
 
     function initLayers() {
         bgGradient = new cc.LayerGradient(cc.color(161, 224, 229), cc.color(76, 161, 175));
@@ -17,14 +19,32 @@ lowfat.LevelSelectMenu = function (container, spriteFactory, gameStateModel, lev
         var levelName = "boardDog5x5";
         var boardInfo = levelsModel.getBoardInfoByLevelName(levelName);
         var levelState = gameStateModel.getLevelStateByLevelName(levelName);
-        var thumbnail = lowfat.LevelThumbnail(spriteFactory, boardInfo, levelName, levelState);
+        thumbnail = lowfat.LevelThumbnail(spriteFactory, boardInfo, levelName, levelState, processLevelSelected);
         thumbnail.addToParent(thumbnailsContainer);
         thumbnail.setPosition(10, 10);
     }
 
+    function initControls() {
+        touchControls = lowfat.LevelSelectTouchControls(container, null, processTouchDown);
+        touchControls.enable();
+    }
+
     function start(levelName) {
+        // levelName передается, чтобы подсветить только что пройденный уровень
         initLayers();
         initThumbnails();
+        initControls();
+    }
+
+    function processTouchDown(eventX, eventY) {
+        thumbnail.processMouseClick(eventX, eventY);
+    }
+
+    function processLevelSelected(levelName) {
+        thumbnail.removeFromParent();
+        bgGradient.removeFromParent();
+        touchControls.disable();
+        startBoardCallback.call(startBoardContext, levelName, [], [], 3);
     }
 
     function onResize(screenSize) {
@@ -38,7 +58,7 @@ lowfat.LevelSelectMenu = function (container, spriteFactory, gameStateModel, lev
     }
 };
 
-lowfat.LevelThumbnail = function (spriteFactory, boardInfo, levelName, state) {
+lowfat.LevelThumbnail = function (spriteFactory, boardInfo, levelName, state, selectedCallback) {
     var cellSize = 24;
     var bgSize = 48;
 
@@ -92,6 +112,10 @@ lowfat.LevelThumbnail = function (spriteFactory, boardInfo, levelName, state) {
         parent.addChild(thumbnailNode);
     }
 
+    function removeFromParent() {
+        thumbnailNode.removeFromParent();
+    }
+
     function setPosition(x, y) {
         thumbnailNode.setPosition(x, y);
     }
@@ -122,7 +146,7 @@ lowfat.LevelThumbnail = function (spriteFactory, boardInfo, levelName, state) {
 
     function processMouseClick(eventX, eventY) {
         if (eventHitsNode(eventX, eventY)) {
-            console.log("Selected level " + levelName);
+            selectedCallback(levelName);
         }
     }
 
@@ -137,10 +161,79 @@ lowfat.LevelThumbnail = function (spriteFactory, boardInfo, levelName, state) {
 
     return {
         addToParent: addToParent,
+        removeFromParent: removeFromParent,
         setPosition: setPosition,
         getWidth: getWidth,
         getHeight: getHeight,
         processMouseMove: processMouseMove,
         processMouseClick: processMouseClick
+    }
+};
+
+lowfat.LevelSelectTouchControls = function (scene, moveCallback, downCallback) {
+    var touchStarted = false;
+    var enabled = false;
+
+    function enable() {
+        if (enabled) {
+            throw new Error("Trying to enable controls, but they are already enabled");
+        }
+        enabled = true;
+        addListeners();
+    }
+
+    function disable() {
+        if (!enabled) {
+            throw new Error("Trying to disable controls, but they are already disabled");
+        }
+        enabled = false;
+        removeListeners();
+    }
+
+    function addListeners() {
+        cc.eventManager.addListener({
+            event: cc.EventListener.TOUCH_ONE_BY_ONE,
+            swallowTouches: true,
+            onTouchBegan: function (touch, event) {
+                processTouchStarted(touch.getLocation().x, touch.getLocation().y);
+                return true;
+            },
+            onTouchMoved: function (touch, event) {
+                processTouchUpdated(touch.getLocation().x, touch.getLocation().y, touch.getDelta())
+            },
+            onTouchEnded: function (touch, event) {
+                processTouchEnded(touch.getLocation().x, touch.getLocation().y);
+            }
+        }, scene);
+    }
+
+    function removeListeners() {
+        cc.eventManager.removeListeners(cc.EventListener.TOUCH_ONE_BY_ONE);
+    }
+
+    function forceStopDrag() {
+        touchStarted = false;
+    }
+
+    function processTouchStarted(touchX, touchY) {
+        touchStarted = true;
+        downCallback(touchX, touchY);
+    }
+
+    function processTouchUpdated(touchX, touchY, delta) {
+    }
+
+    function processTouchEnded(touchX, touchY) {
+        if (!touchStarted) {
+            return;
+        }
+
+        touchStarted = false;
+    }
+
+    return {
+        enable: enable,
+        disable: disable,
+        forceStopDrag: forceStopDrag
     }
 };

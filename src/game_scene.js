@@ -19,7 +19,7 @@ var GameScene = cc.Scene.extend({
     },
 
     startLevelSelect: function (levelName) {
-        this.levelSelectMenu = lowfat.LevelSelectMenu(this, lowfat.SpriteFactory, this.gameStateModel, this.levelsModel, cc.director.getWinSize());
+        this.levelSelectMenu = lowfat.LevelSelectMenu(this, lowfat.SpriteFactory, this.gameStateModel, this.levelsModel, this.startBoard, this, cc.director.getWinSize());
         this.levelSelectMenu.start(levelName);
     },
 
