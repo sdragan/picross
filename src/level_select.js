@@ -1,11 +1,11 @@
 var lowfat = lowfat || {};
 
 lowfat.LevelSelectMenu = function (container, spriteFactory, gameStateModel, levelsModel, startBoardCallback, startBoardContext, screenSize) {
-    var thumbnailsContainer = null;
     var screenSizeInPoints = screenSize;
+    var thumbnailsContainer = null;
     var bgGradient = null;
     var touchControls = null;
-    var thumbnail = null;
+    var thumbnails = null;
 
     function initLayers() {
         bgGradient = new cc.LayerGradient(cc.color(161, 224, 229), cc.color(76, 161, 175));
@@ -16,12 +16,18 @@ lowfat.LevelSelectMenu = function (container, spriteFactory, gameStateModel, lev
     }
 
     function initThumbnails() {
-        var levelName = "boardDog5x5";
-        var boardInfo = levelsModel.getBoardInfoByLevelName(levelName);
-        var levelState = gameStateModel.getLevelStateByLevelName(levelName);
-        thumbnail = lowfat.LevelThumbnail(spriteFactory, boardInfo, levelName, levelState, processLevelSelected);
-        thumbnail.addToParent(thumbnailsContainer);
-        thumbnail.setPosition(10, 10);
+        thumbnails = [];
+        var levelList = levelsModel.getLevelList();
+        for (var i = 0; i < levelList.length; i++) {
+            var levelName = levelList[i];
+            var boardInfo = levelsModel.getBoardInfoByLevelName(levelName);
+            var levelState = gameStateModel.getLevelStateByLevelName(levelName);
+            var thumbnail = lowfat.LevelThumbnail(spriteFactory, boardInfo, levelName, levelState, processLevelSelected);
+            var prevThumbnailY = i > 0 ? thumbnails[i - 1].getPositionY() + thumbnails[i - 1].getHeight() + 10 : 10;
+            thumbnail.addToParent(thumbnailsContainer);
+            thumbnail.setPosition((screenSizeInPoints.width - thumbnail.getWidth()) / 2, prevThumbnailY);
+            thumbnails.push(thumbnail);
+        }
     }
 
     function initControls() {
@@ -37,11 +43,19 @@ lowfat.LevelSelectMenu = function (container, spriteFactory, gameStateModel, lev
     }
 
     function processTouchDown(eventX, eventY) {
-        thumbnail.processMouseClick(eventX, eventY);
+        for (var i = 0; i < thumbnails.length; i++) {
+            thumbnails[i].processMouseClick(eventX, eventY);
+        }
     }
 
     function processLevelSelected(levelName) {
-        thumbnail.removeFromParent();
+        if (gameStateModel.getLevelStateByLevelName(levelName) < 0) {
+            return;
+        }
+
+        for (var i = 0; i < thumbnails.length; i++) {
+            thumbnails[i].removeFromParent();
+        }
         bgGradient.removeFromParent();
         touchControls.disable();
         startBoardCallback.call(startBoardContext, levelName, [], [], 3);
@@ -84,6 +98,21 @@ lowfat.LevelThumbnail = function (spriteFactory, boardInfo, levelName, state, se
         var bg = spriteFactory.getSprite("LevelThumbnailBackgroundLocked", 0, 0);
         bg.setScale(scaleX, scaleY);
         thumbnailNode.addChild(bg);
+        var lockIcon = spriteFactory.getSprite("LevelThumbnailLockIcon");
+        lockIcon.setPosition(getWidth() / 2, getHeight() / 2);
+        thumbnailNode.addChild(lockIcon);
+    }
+
+    function drawAvailableButNotWon() {
+        var bgRatio = bgSize / cellSize;
+        var scaleX = cols / bgRatio;
+        var scaleY = rows / bgRatio;
+        var bg = spriteFactory.getSprite("LevelThumbnailBackground", 0, 0);
+        bg.setScale(scaleX, scaleY);
+        thumbnailNode.addChild(bg);
+        var lockIcon = spriteFactory.getSprite("LevelThumbnailQuestionMarkIcon");
+        lockIcon.setPosition(getWidth() / 2, getHeight() / 2);
+        thumbnailNode.addChild(lockIcon);
     }
 
     function drawUnlocked() {
@@ -104,10 +133,6 @@ lowfat.LevelThumbnail = function (spriteFactory, boardInfo, levelName, state, se
         }
     }
 
-    function drawAvailableButNotWon() {
-
-    }
-
     function addToParent(parent) {
         parent.addChild(thumbnailNode);
     }
@@ -118,6 +143,14 @@ lowfat.LevelThumbnail = function (spriteFactory, boardInfo, levelName, state, se
 
     function setPosition(x, y) {
         thumbnailNode.setPosition(x, y);
+    }
+
+    function getPositionX() {
+        return thumbnailNode.getPositionX();
+    }
+
+    function getPositionY() {
+        return thumbnailNode.getPositionY();
     }
 
     function getIsFilled(x, y) {
@@ -163,6 +196,8 @@ lowfat.LevelThumbnail = function (spriteFactory, boardInfo, levelName, state, se
         addToParent: addToParent,
         removeFromParent: removeFromParent,
         setPosition: setPosition,
+        getPositionX: getPositionX,
+        getPositionY: getPositionY,
         getWidth: getWidth,
         getHeight: getHeight,
         processMouseMove: processMouseMove,

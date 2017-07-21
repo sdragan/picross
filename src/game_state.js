@@ -115,10 +115,18 @@ lowfat.GameStateModel = function () {
 
 lowfat.LevelsModel = function () {
     var levels = {};
+    var levelList = [];
 
     initLevelList();
 
     function initLevelList() {
+        levelList = [
+            "smallBoard4x5",
+            "boardDog5x5",
+            "boardGlass8x8",
+            "boardHeart10x10"
+        ];
+
         levels["smallBoard4x5"] = lowfat.BoardInfo(4, 5, [0, 1, 0, 1, 0, 0, 0, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1, 1]);
         levels["boardDog5x5"] = lowfat.BoardInfo(5, 5, [0, 0, 0, 1, 0, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 0, 1, 0, 1, 0, 0, 1, 0, 1, 0]);
         levels["boardGlass8x8"] = lowfat.BoardInfo(8, 8, [0, 1, 1, 1, 1, 0, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1]);
@@ -132,7 +140,12 @@ lowfat.LevelsModel = function () {
         throw new Error("Can't find level " + levelName);
     }
 
+    function getLevelList() {
+        return levelList;
+    }
+
     return {
-        getBoardInfoByLevelName: getBoardInfoByLevelName
+        getBoardInfoByLevelName: getBoardInfoByLevelName,
+        getLevelList: getLevelList
     }
 };
