@@ -536,6 +536,25 @@
 				<key>textureRotated</key>
 				<false/>
 			</dict>
+			<key>LifeIconEmpty0000</key>
+			<dict>
+				<key>aliases</key>
+				<array/>
+				<key>sourceColorRect</key>
+				<string>{{0,0},{19,18}}</string>
+				<key>spriteOffset</key>
+				<string>{0,0}</string>
+				<key>spriteSize</key>
+				<string>{19,18}</string>
+				<key>spriteSourceSize</key>
+				<string>{19,18}</string>
+				<key>spriteTrimmed</key>
+				<false/>
+				<key>textureRect</key>
+				<string>{{104,242},{19,18}}</string>
+				<key>textureRotated</key>
+				<false/>
+			</dict>
 		</dict>
 		<key>metadata</key>
 		<dict>

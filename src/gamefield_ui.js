@@ -224,10 +224,24 @@ lowfat.FullscreenOverlay = function (container, screenSize) {
 lowfat.LivesPanel = function (container, screenSize, spriteFactory) {
     var screenSizeInPoints = screenSize;
     var icons = [];
+    var emptyIcons = [];
     var livesCount = 3;
 
     function displayLifeIcons() {
-        for (var i = 0; i < livesCount; i++) {
+        var i;
+
+        for (i = 0; i < 3; i++) {
+            var emptyIcon;
+            if (emptyIcons.length <= i) {
+                emptyIcon = spriteFactory.getSprite("LifeIconEmpty");
+                emptyIcons.push(emptyIcon);
+                container.addChild(emptyIcon);
+                emptyIcon.setPosition(getIconX(i), 680);
+            }
+            emptyIcon.setVisible(i >= livesCount - 1);
+        }
+
+        for (i = 0; i < livesCount; i++) {
             var icon;
             if (icons.length <= i) {
                 icon = spriteFactory.getSprite("LifeIcon");
@@ -255,6 +269,7 @@ lowfat.LivesPanel = function (container, screenSize, spriteFactory) {
     function decrementLife() {
         livesCount--;
         fadeLifeIcon(icons[livesCount]);
+        emptyIcons[livesCount].setVisible(true);
     }
 
     function fadeLifeIcon(icon) {
@@ -264,8 +279,12 @@ lowfat.LivesPanel = function (container, screenSize, spriteFactory) {
 
     function onResize(screenSize) {
         screenSizeInPoints = screenSize;
-        for (var i = 0; i < icons.length; i++) {
+        var i;
+        for (i = 0; i < icons.length; i++) {
             icons[i].setPositionX(getIconX(i));
+        }
+        for (i = 0; i < emptyIcons.length; i++) {
+            emptyIcons[i].setPositionX(getIconX(i));
         }
     }
 
