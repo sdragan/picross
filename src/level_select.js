@@ -40,6 +40,7 @@ lowfat.LevelSelectMenu = function (container, spriteFactory, gameStateModel, lev
         initLayers();
         initThumbnails();
         initControls();
+        gameStateModel.saveFromLevelSelect();
     }
 
     function processTouchDown(eventX, eventY) {

@@ -185,14 +185,16 @@ lowfat.Board = function (cols, rows, elementsArray, marksArray, mistakenlyMarked
         return getGuessedCellsAmount() == getTotalFilledCells();
     }
 
-    function mark(x, y) {
+    function mark(x, y, ignoreMistakenlyMarkedCellCheck) {
         checkBounds(x, y);
         if (this.getIsMarked(x, y) == true) {
             throw new Error("Cell " + x + ", " + y + " is already marked");
         }
-        if (this.getIsFilled(x, y) == false) {
+
+        if (ignoreMistakenlyMarkedCellCheck !== true && this.getIsFilled(x, y) == false) {
             mistakenlyMarkedCellIndexes.push(getCellIndex(x, y));
         }
+
         marks [getCellIndex(x, y)] = 1;
         checkGuessedCell(x, y);
     }

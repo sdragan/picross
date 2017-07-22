@@ -171,7 +171,11 @@ lowfat.Gamefield = function (scene, spriteFactory, gameStateModel, screenSize, r
             }
         }
 
-        gameStateModel.saveFromBoard(levelName, board.getMarkedCells(), board.getMistakenlyMarkedCells(), livesLeft)
+        if (livesLeft > 0 && !board.getIsSolved()) {
+            gameStateModel.saveFromBoard(levelName, board.getMarkedCells(), board.getMistakenlyMarkedCells(), livesLeft)
+        } else {
+            gameStateModel.saveFromLevelSelect();
+        }
     }
 
     function levelLost() {
@@ -181,6 +185,9 @@ lowfat.Gamefield = function (scene, spriteFactory, gameStateModel, screenSize, r
 
     function levelWon() {
         controls.disable();
+        if (gameStateModel.getLevelStateByLevelName(levelName) < livesLeft) {
+            gameStateModel.setLevelStatus(levelName, livesLeft);
+        }
         playShortLevelWonAnimation(onShortLevelWonAnimationFinished);
     }
 
@@ -372,7 +379,7 @@ lowfat.Gamefield = function (scene, spriteFactory, gameStateModel, screenSize, r
         function revealEmptyCellIfNotMarked(cX, cY) {
             if (!board.getIsMarked(cX, cY)) {
                 revealEmptyCell(cX, cY, delay * markedCellsCount);
-                board.mark(cX, cY);
+                board.mark(cX, cY, true);
                 markedCellsCount++;
             }
         }

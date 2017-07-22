@@ -1,6 +1,6 @@
 var lowfat = lowfat || {};
 
-lowfat.GameStateModel = function () {
+lowfat.GameStateModel = function (levelsModel) {
     var levelsState = {};
 
     var LOCAL_STORAGE_ID = "lowfat_picross";
@@ -9,7 +9,12 @@ lowfat.GameStateModel = function () {
     var SCENE_LEVEL_SELECT = "levelSelect";
 
     function init(boardCallback, levelSelectCallback, callbackContext) {
-        var gameStateVO = getPresetLevelSelectGameState();
+        // == uncomment when necessary ==
+        // resetLocalStorage();
+        // ==============================
+
+        // var gameStateVO = getPresetLevelSelectGameState();
+        var gameStateVO = loadFromLocalStorage();
 
         if (gameStateVO.scene == SCENE_BOARD) {
             boardCallback.call(callbackContext, gameStateVO.levelName, gameStateVO.markedCells, gameStateVO.mistakenlyMarkedCells, gameStateVO.livesLeft);
@@ -18,10 +23,15 @@ lowfat.GameStateModel = function () {
         }
     }
 
+    function resetLocalStorage() {
+        cc.sys.localStorage.removeItem(LOCAL_STORAGE_ID_LEVELS_STATE);
+        cc.sys.localStorage.removeItem(LOCAL_STORAGE_ID);
+    }
+
     function loadFromLocalStorage() {
         var rawGameState = cc.sys.localStorage.getItem(LOCAL_STORAGE_ID);
         var rawLevelsState = cc.sys.localStorage.getItem(LOCAL_STORAGE_ID_LEVELS_STATE);
-        if (rawGameState !== undefined) {
+        if (rawGameState && rawGameState !== undefined) {
             console.log("gameState found");
             var gameState = JSON.parse(rawGameState);
             var levelsState = rawLevelsState !== undefined ? JSON.parse(rawLevelsState) : {};
@@ -29,15 +39,16 @@ lowfat.GameStateModel = function () {
             return buildGameStateVO(gameState.scene, gameState.levelName, gameState.markedCells, gameState.mistakenlyMarkedCells, gameState.livesLeft);
         } else {
             console.log("no gameState yet");
+            setLevelStatus(levelsModel.getLevelList()[0], 0);
             return buildGameStateVO(SCENE_LEVEL_SELECT, "", [], [], 0);
         }
     }
 
     function initPresetLevelsState() {
         var presetLevelsStateVO = {
-            "smallBoard4x5": 2,
-            "boardDog5x5": 3,
-            "boardGlass8x8": 0,
+            "smallBoard4x5": 0,
+            "boardDog5x5": -1,
+            "boardGlass8x8": -1,
             "boardHeart10x10": -1
         };
         parseLevelsState(presetLevelsStateVO);
@@ -77,7 +88,25 @@ lowfat.GameStateModel = function () {
 
     function setLevelStatus(levelName, stars) {
         levelsState[levelName] = stars;
+        unlockNextLevelIfNecessary(levelName);
         saveLevelsState();
+    }
+
+    function unlockNextLevelIfNecessary(levelName) {
+        var levelState = getLevelStateByLevelName(levelName);
+        if (levelState <= 0) {
+            return;
+        }
+        var levelList = levelsModel.getLevelList();
+        var index = levelList.indexOf(levelName);
+        if (index >= levelList.length - 1) {
+            return;
+        }
+        var nextLevel = levelList[index + 1];
+        if (getLevelStateByLevelName(nextLevel) >= 0) {
+            return;
+        }
+        setLevelStatus(nextLevel, 0);
     }
 
     function saveFromBoard(levelName, markedCells, mistakenlyMarkedCells, livesLeft) {
@@ -101,7 +130,10 @@ lowfat.GameStateModel = function () {
     }
 
     function getLevelStateByLevelName(levelName) {
-        return levelsState[levelName];
+        if (levelsState.hasOwnProperty(levelName)) {
+            return levelsState[levelName];
+        }
+        return -1;
     }
 
     return {
