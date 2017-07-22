@@ -1,6 +1,6 @@
 var lowfat = lowfat || {};
 
-lowfat.Gamefield = function (scene, spriteFactory, gameStateModel, screenSize) {
+lowfat.Gamefield = function (scene, spriteFactory, gameStateModel, screenSize, returnToLevelSelectCallback, returnToLevelSelectCallbackContext) {
     var container = scene;
     var levelName = null;
     var boardInfo = null;
@@ -16,7 +16,6 @@ lowfat.Gamefield = function (scene, spriteFactory, gameStateModel, screenSize) {
     var boardContainer = null;
     var uiContainer = null;
     var menuContainer = null;
-    var postLevelMenu = null;
     var livesPanel = null;
     var screenSizeInPoints = screenSize;
 
@@ -40,7 +39,6 @@ lowfat.Gamefield = function (scene, spriteFactory, gameStateModel, screenSize) {
         boardContainer.setCascadeOpacityEnabled(true);
         menuContainer = new cc.Node();
         container.addChild(menuContainer);
-        postLevelMenu = lowfat.PostLevelMenu(menuContainer, screenSizeInPoints, spriteFactory, restartLevelAfterLost, backToMenuAfterLevel);
         uiContainer = new cc.Node();
         container.addChild(uiContainer);
         livesPanel = lowfat.LivesPanel(uiContainer, screenSizeInPoints, spriteFactory);
@@ -196,6 +194,10 @@ lowfat.Gamefield = function (scene, spriteFactory, gameStateModel, screenSize) {
         playBoardClearAnimation(resetLevel);
     }
 
+    function restartLevelAfterWin() {
+        playBoardClearAnimation(resetLevel);
+    }
+
     function resetLevel() {
         resetBoardAndLives();
         resetLabels();
@@ -229,7 +231,12 @@ lowfat.Gamefield = function (scene, spriteFactory, gameStateModel, screenSize) {
     }
 
     function onGrayBoardOutFinished() {
-        postLevelMenu.showLost();
+        displayLevelLostMenu();
+    }
+
+    function displayLevelLostMenu() {
+        var postLevelMenu = lowfat.PostLevelLostMenu(menuContainer, screenSizeInPoints, spriteFactory, restartLevelAfterLost, backToMenuAfterLevelLost);
+        postLevelMenu.show();
     }
 
     function ungrayBoardOut() {
@@ -273,11 +280,16 @@ lowfat.Gamefield = function (scene, spriteFactory, gameStateModel, screenSize) {
     }
 
     function onShortLevelWonAnimationFinished() {
-        postLevelMenu.showWon(livesLeft);
+        var postLevelMenu = lowfat.PostLevelWinMenu(menuContainer, screenSizeInPoints, spriteFactory, livesLeft, restartLevelAfterWin, backToMenuAfterLevelWin);
+        postLevelMenu.show();
     }
 
-    function backToMenuAfterLevel() {
-        console.log("Back to menu");
+    function backToMenuAfterLevelWin() {
+        returnToLevelSelectCallback.call(returnToLevelSelectCallbackContext, levelName)
+    }
+
+    function backToMenuAfterLevelLost() {
+        returnToLevelSelectCallback.call(returnToLevelSelectCallbackContext);
     }
 
     function revealFilledCell(cellX, cellY) {
@@ -371,6 +383,7 @@ lowfat.Gamefield = function (scene, spriteFactory, gameStateModel, screenSize) {
         boardDimensions.resize(screenSizeInPoints);
         bgGradient.setContentSize(screenSizeInPoints.width, screenSizeInPoints.height);
         boardContainer.setPositionX(boardDimensions.getContainerLeftX());
+        livesPanel.onResize(screenSize);
     }
 
     function allElementsOfArrayAreEqualTo(arr, value) {

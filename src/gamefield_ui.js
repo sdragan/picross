@@ -1,10 +1,9 @@
 var lowfat = lowfat || {};
 
-lowfat.PostLevelMenu = function (container, screenSizeInPoints, spriteFactory, restartCallback, backToMenuCallback) {
-    var screenSize = screenSizeInPoints;
-    var overlayContainer;
+lowfat.PostLevelLostMenu = function (container, screenSize, spriteFactory, restartCallback, backToMenuCallback) {
+    var screenSizeInPoints = screenSize;
     var overlay;
-    var menuContainer;
+    var buttonsContainer;
 
     var retryButton;
     var backToMenuButton;
@@ -14,22 +13,9 @@ lowfat.PostLevelMenu = function (container, screenSizeInPoints, spriteFactory, r
     init();
 
     function init() {
-        overlayContainer = new cc.Node();
-        overlay = new cc.LayerColor(cc.color(0, 0, 0, 50));
-        overlay.setVisible(false);
-        overlayContainer.addChild(overlay);
-        container.addChild(overlayContainer);
-
-        menuContainer = new cc.Node();
-        container.addChild(menuContainer);
-    }
-
-    function showOverlay() {
-        overlay.setVisible(true);
-    }
-
-    function hideOverlay() {
-        overlay.setVisible(false);
+        overlay = lowfat.FullscreenOverlay(container, screenSizeInPoints);
+        buttonsContainer = new cc.Node();
+        container.addChild(buttonsContainer);
     }
 
     function createButton(outSkin, overSkin, x, y, onTriggeredEvent) {
@@ -42,39 +28,116 @@ lowfat.PostLevelMenu = function (container, screenSizeInPoints, spriteFactory, r
         return button;
     }
 
-    function showWon(livesLeft) {
-        console.log("postLevel win menu; lives left: " + livesLeft);
-        showOverlay();
+    function show() {
+        overlay.show();
+
+        var retryButtonX = screenSize.width / 2 - 50;
+        retryButton = createButton("Btn_Restart", "Btn_Restart_Over", retryButtonX, -50, retryButtonTouchEvent);
+        retryButton.setTouchEnabled(false);
+        buttonsContainer.addChild(retryButton);
+
+        var backToMenuButtonX = screenSize.width / 2 + 50;
+        backToMenuButton = createButton("Btn_Back_To_Menu", "Btn_Back_To_Menu_Over", backToMenuButtonX, -50, backToMenuButtonTouchEvent);
+        backToMenuButton.setTouchEnabled(false);
+        buttonsContainer.addChild(backToMenuButton);
+
+        backToMenuButton.runAction(new cc.Sequence(new cc.MoveTo(0.7, backToMenuButton.getPositionX(), 360).easing(cc.easeBackOut())));
+        retryButton.runAction(new cc.Sequence(new cc.MoveTo(0.7, retryButton.getPositionX(), 360).easing(cc.easeBackOut()), new cc.CallFunc(showButtonsFinished)));
+    }
+
+    function showButtonsFinished() {
+        retryButton.setTouchEnabled(true);
+        backToMenuButton.setTouchEnabled(true);
+    }
+
+    function retryButtonTouchEvent(sender, type) {
+        if (type == ccui.Widget.TOUCH_ENDED) {
+            onRetryButton();
+        }
+    }
+
+    function backToMenuButtonTouchEvent(sender, type) {
+        if (type == ccui.Widget.TOUCH_ENDED) {
+            onBackToMenuButton();
+        }
+    }
+
+    function onRetryButton() {
+        selectedCallback = restartCallback;
+        hideButtons();
+    }
+
+    function onBackToMenuButton() {
+        selectedCallback = backToMenuCallback;
+        hideButtons();
+    }
+
+    function hideButtons() {
+        retryButton.runAction(new cc.Sequence(new cc.MoveTo(0.5, retryButton.getPositionX(), -50).easing(cc.easeQuadraticActionIn())));
+        backToMenuButton.runAction(new cc.Sequence(new cc.MoveTo(0.5, backToMenuButton.getPositionX(), -50).easing(cc.easeQuadraticActionIn()), new cc.CallFunc(onHideButtonsFinished)));
+    }
+
+    function onHideButtonsFinished() {
+        retryButton.removeFromParent();
+        backToMenuButton.removeFromParent();
+        overlay.hide();
+        selectedCallback();
+    }
+
+    return {
+        show: show
+    }
+};
+
+lowfat.PostLevelWinMenu = function (container, screenSize, spriteFactory, livesLeft, restartCallback, backToMenuCallback) {
+    var screenSizeInPoints = screenSize;
+    var overlay;
+    var buttonsContainer;
+
+    var retryButton;
+    var backToMenuButton;
+
+    var selectedCallback;
+
+    init();
+
+    function init() {
+        overlay = lowfat.FullscreenOverlay(container, screenSizeInPoints);
+        buttonsContainer = new cc.Node();
+        container.addChild(buttonsContainer);
+    }
+
+    function createButton(outSkin, overSkin, x, y, onTriggeredEvent) {
+        var button = new ccui.Button();
+        var outSkinTextureName = spriteFactory.getMCTextureName(outSkin);
+        var overSkinTextureName = spriteFactory.getMCTextureName(overSkin);
+        button.loadTextures(outSkinTextureName, overSkinTextureName, "", ccui.Widget.PLIST_TEXTURE);
+        button.setPosition(x, y);
+        button.addTouchEventListener(onTriggeredEvent);
+        return button;
+    }
+
+    function show() {
+        overlay.show();
+
+        var backToMenuButtonX = screenSize.width / 2;
 
         if (livesLeft < 3) {
-            retryButton = createButton("Btn_Restart", "Btn_Restart_Over", screenSize.width / 2, -50, retryButtonTouchEvent);
+            backToMenuButtonX = screenSize.width / 2 + 50;
+            var retryButtonX = screenSize.width / 2 - 50;
+            retryButton = createButton("Btn_Restart", "Btn_Restart_Over", retryButtonX, -50, retryButtonTouchEvent);
             retryButton.setTouchEnabled(false);
-            menuContainer.addChild(retryButton);
+            buttonsContainer.addChild(retryButton);
             retryButton.runAction(new cc.Sequence(new cc.MoveTo(0.7, retryButton.getPositionX(), 360).easing(cc.easeBackOut())));
         }
-        backToMenuButton = createButton("Btn_MoreGames", "Btn_MoreGames_Over", screenSize.width / 2 + 80, -50, backToMenuButtonTouchEvent);
+
+        backToMenuButton = createButton("Btn_Back_To_Menu", "Btn_Back_To_Menu_Over", backToMenuButtonX, -50, backToMenuButtonTouchEvent);
         backToMenuButton.setTouchEnabled(false);
-        menuContainer.addChild(backToMenuButton);
-        backToMenuButton.runAction(new cc.Sequence(new cc.MoveTo(0.7, backToMenuButton.getPositionX(), 360).easing(cc.easeBackOut()), new cc.CallFunc(showWinButtonsFinished)));
-
+        buttonsContainer.addChild(backToMenuButton);
+        backToMenuButton.runAction(new cc.Sequence(new cc.MoveTo(0.7, backToMenuButton.getPositionX(), 360).easing(cc.easeBackOut()), new cc.CallFunc(showButtonsFinished)));
     }
 
-    function showLost() {
-        console.log("postLevel lost menu");
-        showOverlay();
-
-        retryButton = createButton("Btn_Restart", "Btn_Restart_Over", screenSize.width / 2, -50, retryButtonTouchEvent);
-        retryButton.setTouchEnabled(false);
-        menuContainer.addChild(retryButton);
-
-        retryButton.runAction(new cc.Sequence(new cc.MoveTo(0.7, retryButton.getPositionX(), 360).easing(cc.easeBackOut()), new cc.CallFunc(showLostButtonsFinished)));
-    }
-
-    function showLostButtonsFinished() {
-        retryButton.setTouchEnabled(true);
-    }
-
-    function showWinButtonsFinished() {
+    function showButtonsFinished() {
         if (retryButton) {
             retryButton.setTouchEnabled(true);
         }
@@ -95,19 +158,15 @@ lowfat.PostLevelMenu = function (container, screenSizeInPoints, spriteFactory, r
 
     function onRetryButton() {
         selectedCallback = restartCallback;
-        hideLostMenuButtons();
+        hideButtons();
     }
 
     function onBackToMenuButton() {
         selectedCallback = backToMenuCallback;
-        hideWinMenuButtons();
+        hideButtons();
     }
 
-    function hideLostMenuButtons() {
-        retryButton.runAction(new cc.Sequence(new cc.MoveTo(0.5, retryButton.getPositionX(), -50).easing(cc.easeQuadraticActionIn()), new cc.CallFunc(onHideButtonsFinished)));
-    }
-
-    function hideWinMenuButtons() {
+    function hideButtons() {
         if (retryButton) {
             retryButton.runAction(new cc.Sequence(new cc.MoveTo(0.5, retryButton.getPositionX(), -50).easing(cc.easeQuadraticActionIn())));
         }
@@ -115,22 +174,55 @@ lowfat.PostLevelMenu = function (container, screenSizeInPoints, spriteFactory, r
     }
 
     function onHideButtonsFinished() {
-        hideOverlay();
+        if (retryButton) {
+            retryButton.removeFromParent();
+        }
+        backToMenuButton.removeFromParent();
+        overlay.hide();
         selectedCallback();
     }
 
-    function onResize(screenSizeInPoints) {
-        screenSize = screenSizeInPoints;
-    }
-
     return {
-        onResize: onResize,
-        showLost: showLost,
-        showWon: showWon
+        show: show
     }
 };
 
-lowfat.LivesPanel = function (container, screenSizeInPoints, spriteFactory) {
+lowfat.FullscreenOverlay = function (container, screenSize) {
+
+    var screenSizeInPoints = screenSize;
+    var overlay = null;
+
+    init();
+
+    function init() {
+        overlay = new cc.LayerColor(cc.color(0, 0, 0, 50));
+        overlay.setVisible(false);
+        container.addChild(overlay);
+    }
+
+    function show() {
+        overlay.setVisible(true);
+    }
+
+    function hide() {
+        overlay.setVisible(false);
+    }
+
+    function onResize(screenSize) {
+        screenSizeInPoints = screenSize;
+        overlay.setContentSize(screenSizeInPoints.width, screenSizeInPoints.height);
+    }
+
+    return {
+        show: show,
+        hide: hide,
+        onResize: onResize
+    }
+};
+
+
+lowfat.LivesPanel = function (container, screenSize, spriteFactory) {
+    var screenSizeInPoints = screenSize;
     var icons = [];
     var livesCount = 3;
 
@@ -147,8 +239,12 @@ lowfat.LivesPanel = function (container, screenSizeInPoints, spriteFactory) {
                 var fadeInAction = new cc.FadeIn(0.1);
                 icon.runAction(new cc.Sequence(delayAction, fadeInAction));
             }
-            icon.setPosition((screenSizeInPoints.width / 2) + 40 * (-1 + i), 680);
+            icon.setPosition(getIconX(i), 680);
         }
+    }
+
+    function getIconX(iconIndex) {
+        return (screenSizeInPoints.width / 2) + 40 * (-1 + iconIndex);
     }
 
     function setInitialLives(count) {
@@ -166,8 +262,16 @@ lowfat.LivesPanel = function (container, screenSizeInPoints, spriteFactory) {
         icon.runAction(fadeAction);
     }
 
+    function onResize(screenSize) {
+        screenSizeInPoints = screenSize;
+        for (var i = 0; i < icons.length; i++) {
+            icons[i].setPositionX(getIconX(i));
+        }
+    }
+
     return {
         setInitialLives: setInitialLives,
-        decrementLife: decrementLife
+        decrementLife: decrementLife,
+        onResize: onResize
     }
 };

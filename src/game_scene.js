@@ -14,7 +14,7 @@ var GameScene = cc.Scene.extend({
 
     startBoard: function (levelName, markedCells, mistakenlyMarkedCells, livesLeft) {
         var boardInfo = this.levelsModel.getBoardInfoByLevelName(levelName);
-        this.gamefield = lowfat.Gamefield(this, lowfat.SpriteFactory, this.gameStateModel, cc.director.getWinSize());
+        this.gamefield = lowfat.Gamefield(this, lowfat.SpriteFactory, this.gameStateModel, cc.director.getWinSize(), this.startLevelSelect, this);
         this.gamefield.start(levelName, boardInfo, markedCells, mistakenlyMarkedCells, livesLeft);
     },
 
