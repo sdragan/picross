@@ -3,16 +3,22 @@ var lowfat = lowfat || {};
 lowfat.LevelSelectMenu = function (container, spriteFactory, gameStateModel, levelsModel, startBoardCallback, startBoardContext, screenSize) {
     var screenSizeInPoints = screenSize;
     var thumbnailsContainer = null;
+    var thumbnailsContainerContainer = null;
     var bgGradient = null;
     var touchControls = null;
     var thumbnails = null;
+    var selectedThumbnail = null;
 
     function initLayers() {
         bgGradient = new cc.LayerGradient(cc.color(161, 224, 229), cc.color(76, 161, 175));
         container.addChild(bgGradient);
 
+        thumbnailsContainerContainer = new cc.Node();
+        container.addChild(thumbnailsContainerContainer);
+
         thumbnailsContainer = new cc.Node();
-        container.addChild(thumbnailsContainer);
+        thumbnailsContainerContainer.addChild(thumbnailsContainer);
+        updateThumbnailsContainerContainerX();
     }
 
     function initThumbnails() {
@@ -23,10 +29,12 @@ lowfat.LevelSelectMenu = function (container, spriteFactory, gameStateModel, lev
             var boardInfo = levelsModel.getBoardInfoByLevelName(levelName);
             var levelState = gameStateModel.getLevelStateByLevelName(levelName);
             var thumbnail = lowfat.LevelThumbnail(spriteFactory, boardInfo, levelName, levelState, processLevelSelected);
-            var prevThumbnailY = i > 0 ? thumbnails[i - 1].getPositionY() + thumbnails[i - 1].getHeight() + 10 : 10;
+            var thumbnailX = i > 0 ? thumbnails[i - 1].getPositionX() + thumbnails[i - 1].getWidth() + 20 : -thumbnail.getWidth() / 2;
+            var thumbnailY = (screenSizeInPoints.height - thumbnail.getHeight()) / 2;
             thumbnail.addToParent(thumbnailsContainer);
-            thumbnail.setPosition((screenSizeInPoints.width - thumbnail.getWidth()) / 2, prevThumbnailY);
+            thumbnail.setPosition(thumbnailX, thumbnailY);
             thumbnails.push(thumbnail);
+            thumbnail.unHighlight();
         }
     }
 
@@ -35,36 +43,81 @@ lowfat.LevelSelectMenu = function (container, spriteFactory, gameStateModel, lev
         touchControls.enable();
     }
 
+    function centerListOnLastPlayedLevel(levelName) {
+        if (typeof levelName === "undefined" || !levelName) {
+            levelName = thumbnails[0].getLevelName();
+        }
+        var thumbnail = getThumbnailByLevelName(levelName);
+        selectedThumbnail = thumbnail;
+        thumbnail.highlight();
+        thumbnailsContainer.setPositionX(getThumbnailsContainerXToGetLevelInCenter(thumbnail));
+    }
+
+    function getThumbnailsContainerXToGetLevelInCenter(thumbnail) {
+        return -(thumbnail.getPositionX() + thumbnail.getWidth() * 0.5);
+    }
+
+    function updateThumbnailsContainerContainerX() {
+        thumbnailsContainerContainer.setPositionX(screenSizeInPoints.width * 0.5);
+    }
+
     function start(levelName) {
-        // levelName передается, чтобы подсветить только что пройденный уровень
         initLayers();
         initThumbnails();
         initControls();
-        gameStateModel.saveFromLevelSelect();
+        centerListOnLastPlayedLevel(levelName);
     }
 
     function processTouchDown(eventX, eventY) {
+        var touchX = eventX - thumbnailsContainerContainer.getPositionX() - thumbnailsContainer.getPositionX();
         for (var i = 0; i < thumbnails.length; i++) {
-            thumbnails[i].processMouseClick(eventX, eventY);
+            thumbnails[i].processMouseClick(touchX, eventY);
         }
     }
 
     function processLevelSelected(levelName) {
-        if (gameStateModel.getLevelStateByLevelName(levelName) < 0) {
-            return;
+        var thumbnail = getThumbnailByLevelName(levelName);
+        if (thumbnail == selectedThumbnail) {
+            if (gameStateModel.getLevelStateByLevelName(levelName) < 0) {
+                return;
+            }
+
+            for (var i = 0; i < thumbnails.length; i++) {
+                thumbnails[i].removeFromParent();
+            }
+            bgGradient.removeFromParent();
+            touchControls.disable();
+            startBoardCallback.call(startBoardContext, levelName, [], [], 3);
+        } else {
+            var newThumbnailContainerX = getThumbnailsContainerXToGetLevelInCenter(thumbnail);
+            var diff = newThumbnailContainerX - thumbnailsContainer.getPositionX();
+            var moveAction = new cc.MoveBy(0.6, diff, 0).easing(cc.easeCubicActionOut());
+            var callFuncAction = new cc.CallFunc(scrollFinished);
+            thumbnailsContainer.runAction(new cc.Sequence(moveAction, callFuncAction));
+            touchControls.disable();
+            thumbnail.highlight();
+            selectedThumbnail.unHighlight();
+            selectedThumbnail = thumbnail;
         }
 
-        for (var i = 0; i < thumbnails.length; i++) {
-            thumbnails[i].removeFromParent();
+        function scrollFinished() {
+            touchControls.enable();
         }
-        bgGradient.removeFromParent();
-        touchControls.disable();
-        startBoardCallback.call(startBoardContext, levelName, [], [], 3);
+    }
+
+    function getThumbnailByLevelName(levelName) {
+        for (var i = 0; i < thumbnails.length; i++) {
+            if (thumbnails[i].getLevelName() == levelName) {
+                return thumbnails[i];
+            }
+        }
+        throw new Error("Couldn't find thumbnail for level: " + levelName);
     }
 
     function onResize(screenSize) {
         screenSizeInPoints = screenSize;
-
+        bgGradient.setContentSize(screenSizeInPoints.width, screenSizeInPoints.height);
+        updateThumbnailsContainerContainerX();
     }
 
     return {
@@ -82,7 +135,9 @@ lowfat.LevelThumbnail = function (spriteFactory, boardInfo, levelName, state, se
     var elementsArray = boardInfo.getElementsArray();
 
     var thumbnailNode = new cc.Node();
+    thumbnailNode.setCascadeOpacityEnabled(true);
     var isMouseOver = false;
+    var isHighlighted = true;
 
     if (state > 0) {
         drawUnlocked();
@@ -134,6 +189,22 @@ lowfat.LevelThumbnail = function (spriteFactory, boardInfo, levelName, state, se
         }
     }
 
+    function highlight() {
+        if (isHighlighted) {
+            return;
+        }
+        thumbnailNode.setOpacity(255);
+        isHighlighted = true;
+    }
+
+    function unHighlight() {
+        if (!isHighlighted) {
+            return;
+        }
+        thumbnailNode.setOpacity(120);
+        isHighlighted = false;
+    }
+
     function addToParent(parent) {
         parent.addChild(thumbnailNode);
     }
@@ -164,6 +235,10 @@ lowfat.LevelThumbnail = function (spriteFactory, boardInfo, levelName, state, se
 
     function getHeight() {
         return rows * cellSize;
+    }
+
+    function getLevelName() {
+        return levelName;
     }
 
     function processMouseMove(eventX, eventY) {
@@ -202,7 +277,10 @@ lowfat.LevelThumbnail = function (spriteFactory, boardInfo, levelName, state, se
         getWidth: getWidth,
         getHeight: getHeight,
         processMouseMove: processMouseMove,
-        processMouseClick: processMouseClick
+        processMouseClick: processMouseClick,
+        highlight: highlight,
+        unHighlight: unHighlight,
+        getLevelName: getLevelName
     }
 };
 
