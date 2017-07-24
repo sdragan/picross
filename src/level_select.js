@@ -39,8 +39,32 @@ lowfat.LevelSelectMenu = function (container, spriteFactory, gameStateModel, lev
     }
 
     function initControls() {
-        touchControls = lowfat.LevelSelectTouchControls(container, null, processTouchDown);
+        touchControls = lowfat.LevelSelectTouchControls(container, processControlsTouchEnd, processControlsDrag, processControlsDragEnd);
         touchControls.enable();
+    }
+
+    function processControlsDrag(deltaX, deltaY) {
+        thumbnailsContainer.setPositionX(thumbnailsContainer.getPositionX() + deltaX);
+    }
+
+    function processControlsDragEnd() {
+        scrollToClosestThumbnail();
+    }
+
+    function scrollToClosestThumbnail() {
+        var containerX = thumbnailsContainer.getPositionX();
+        var closestThumbnailIndex = 0;
+        var minDistance = -1;
+        for (var i = 0; i < thumbnails.length; i++) {
+            var distance = Math.abs(-containerX - (thumbnails[i].getPositionX() + thumbnails[i].getWidth() * 0.5));
+            // console.log("distance: " + distance + ", minDistance: " + minDistance);
+            if (minDistance < 0 || distance < minDistance) {
+                minDistance = distance;
+                closestThumbnailIndex = i;
+            }
+        }
+        var closestThumbnail = thumbnails[closestThumbnailIndex];
+        scrollToThumbnail(closestThumbnail);
     }
 
     function centerListOnLastPlayedLevel(levelName) {
@@ -68,7 +92,7 @@ lowfat.LevelSelectMenu = function (container, spriteFactory, gameStateModel, lev
         centerListOnLastPlayedLevel(levelName);
     }
 
-    function processTouchDown(eventX, eventY) {
+    function processControlsTouchEnd(eventX, eventY) {
         var touchX = eventX - thumbnailsContainerContainer.getPositionX() - thumbnailsContainer.getPositionX();
         for (var i = 0; i < thumbnails.length; i++) {
             thumbnails[i].processMouseClick(touchX, eventY);
@@ -89,17 +113,22 @@ lowfat.LevelSelectMenu = function (container, spriteFactory, gameStateModel, lev
             touchControls.disable();
             startBoardCallback.call(startBoardContext, levelName, [], [], 3);
         } else {
-            var newThumbnailContainerX = getThumbnailsContainerXToGetLevelInCenter(thumbnail);
-            var diff = newThumbnailContainerX - thumbnailsContainer.getPositionX();
-            var moveAction = new cc.MoveBy(0.6, diff, 0).easing(cc.easeCubicActionOut());
-            var callFuncAction = new cc.CallFunc(scrollFinished);
-            thumbnailsContainer.runAction(new cc.Sequence(moveAction, callFuncAction));
-            touchControls.disable();
+            scrollToThumbnail(thumbnail);
+        }
+    }
+
+    function scrollToThumbnail(thumbnail) {
+        var newThumbnailContainerX = getThumbnailsContainerXToGetLevelInCenter(thumbnail);
+        var diff = newThumbnailContainerX - thumbnailsContainer.getPositionX();
+        var moveAction = new cc.MoveBy(0.6, diff, 0).easing(cc.easeCubicActionOut());
+        var callFuncAction = new cc.CallFunc(scrollFinished);
+        thumbnailsContainer.runAction(new cc.Sequence(moveAction, callFuncAction));
+        touchControls.disable();
+        if (selectedThumbnail != thumbnail) {
             thumbnail.highlight();
             selectedThumbnail.unHighlight();
             selectedThumbnail = thumbnail;
         }
-
         function scrollFinished() {
             touchControls.enable();
         }
@@ -284,9 +313,10 @@ lowfat.LevelThumbnail = function (spriteFactory, boardInfo, levelName, state, se
     }
 };
 
-lowfat.LevelSelectTouchControls = function (scene, moveCallback, downCallback) {
+lowfat.LevelSelectTouchControls = function (scene, touchEndCallback, dragCallback, dragEndCallback) {
     var touchStarted = false;
     var enabled = false;
+    var isDragging = false;
 
     function enable() {
         if (enabled) {
@@ -331,10 +361,14 @@ lowfat.LevelSelectTouchControls = function (scene, moveCallback, downCallback) {
 
     function processTouchStarted(touchX, touchY) {
         touchStarted = true;
-        downCallback(touchX, touchY);
+        isDragging = false;
     }
 
     function processTouchUpdated(touchX, touchY, delta) {
+        if (Math.abs(delta.x) >= 1) {
+            isDragging = true;
+            dragCallback(delta.x, delta.y);
+        }
     }
 
     function processTouchEnded(touchX, touchY) {
@@ -343,6 +377,12 @@ lowfat.LevelSelectTouchControls = function (scene, moveCallback, downCallback) {
         }
 
         touchStarted = false;
+        if (isDragging) {
+            dragEndCallback();
+        }
+        else {
+            touchEndCallback(touchX, touchY);
+        }
     }
 
     return {
