@@ -9,6 +9,17 @@ lowfat.LevelSelectMenu = function (container, spriteFactory, gameStateModel, lev
     var thumbnails = null;
     var selectedThumbnail = null;
 
+    var speed = 0;
+    var inertiaRatio = 0.88;
+    var isMovingByInertia = false;
+    var dragMinX = 0;
+    var dragMaxX = 0;
+    var lastDirection = 2;
+
+    var DIRECTION_LEFT = 0;
+    var DIRECTION_RIGHT = 1;
+    var DIRECTION_ANY = 2;
+
     function initLayers() {
         bgGradient = new cc.LayerGradient(cc.color(161, 224, 229), cc.color(76, 161, 175));
         container.addChild(bgGradient);
@@ -36,6 +47,8 @@ lowfat.LevelSelectMenu = function (container, spriteFactory, gameStateModel, lev
             thumbnails.push(thumbnail);
             thumbnail.unHighlight();
         }
+        dragMinX = -thumbnails[thumbnails.length - 1].getCenterX();
+        dragMaxX = 0;
     }
 
     function initControls() {
@@ -44,27 +57,60 @@ lowfat.LevelSelectMenu = function (container, spriteFactory, gameStateModel, lev
     }
 
     function processControlsDrag(deltaX, deltaY) {
-        thumbnailsContainer.setPositionX(thumbnailsContainer.getPositionX() + deltaX);
+        speed = deltaX;
+        scrollThumbnailsContainerBy(deltaX);
+        lastDirection = deltaX > 0 ? DIRECTION_LEFT : DIRECTION_RIGHT;
     }
 
     function processControlsDragEnd() {
-        scrollToClosestThumbnail();
+        console.log(speed);
+        if (Math.abs(speed) > 10) {
+            isMovingByInertia = true;
+        } else {
+            scrollToClosestThumbnail(DIRECTION_ANY);
+        }
     }
 
-    function scrollToClosestThumbnail() {
+    function scrollToClosestThumbnail(direction) {
+        var closestThumbnail = findClosestThumbnail(direction);
+        scrollToThumbnail(closestThumbnail);
+    }
+
+    function findClosestThumbnail(direction) {
         var containerX = thumbnailsContainer.getPositionX();
-        var closestThumbnailIndex = 0;
-        var minDistance = -1;
+        var closestLeftThumbnailIndex = -1;
+        var closestRightThumbnailIndex = -1;
+        var minDistanceToLeft = -1;
+        var minDistanceToRight = 1;
+
         for (var i = 0; i < thumbnails.length; i++) {
-            var distance = Math.abs(-containerX - (thumbnails[i].getPositionX() + thumbnails[i].getWidth() * 0.5));
-            // console.log("distance: " + distance + ", minDistance: " + minDistance);
-            if (minDistance < 0 || distance < minDistance) {
-                minDistance = distance;
-                closestThumbnailIndex = i;
+            var distance = -containerX - (thumbnails[i].getCenterX());
+            if (distance > 0) {
+                if (closestLeftThumbnailIndex < 0 || minDistanceToLeft > distance) {
+                    minDistanceToLeft = distance;
+                    closestLeftThumbnailIndex = i;
+                }
+            } else {
+                if (closestRightThumbnailIndex < 0 || minDistanceToRight < distance) {
+                    minDistanceToRight = distance;
+                    closestRightThumbnailIndex = i;
+                }
             }
         }
-        var closestThumbnail = thumbnails[closestThumbnailIndex];
-        scrollToThumbnail(closestThumbnail);
+
+        if (direction == DIRECTION_LEFT && closestLeftThumbnailIndex >= 0) {
+            return thumbnails[closestLeftThumbnailIndex];
+        }
+
+        if (direction == DIRECTION_RIGHT && closestRightThumbnailIndex >= 0) {
+            return thumbnails[closestRightThumbnailIndex];
+        }
+
+        if (closestLeftThumbnailIndex >= 0 && closestRightThumbnailIndex >= 0) {
+            return Math.abs(minDistanceToLeft) < Math.abs(minDistanceToRight) ? thumbnails[closestLeftThumbnailIndex] : thumbnails[closestRightThumbnailIndex];
+        }
+
+        return closestLeftThumbnailIndex >= 0 ? thumbnails[closestLeftThumbnailIndex] : thumbnails[closestRightThumbnailIndex];
     }
 
     function centerListOnLastPlayedLevel(levelName) {
@@ -90,6 +136,36 @@ lowfat.LevelSelectMenu = function (container, spriteFactory, gameStateModel, lev
         initThumbnails();
         initControls();
         centerListOnLastPlayedLevel(levelName);
+    }
+
+    function update(dt) {
+        if (isMovingByInertia) {
+            if (Math.abs(speed) > 0.8) {
+                scrollThumbnailsContainerBy(speed);
+                speed *= inertiaRatio;
+            } else {
+                isMovingByInertia = false;
+                scrollToClosestThumbnail(lastDirection);
+                speed = 0;
+            }
+        }
+    }
+
+    function scrollThumbnailsContainerBy(scrollAmount) {
+        var positionX = thumbnailsContainer.getPositionX();
+        if (positionX <= dragMinX && scrollAmount < 0) {
+            thumbnailsContainer.setPositionX(dragMinX);
+            if (isMovingByInertia) {
+                speed = 0;
+            }
+        } else if (positionX >= dragMaxX && scrollAmount > 0) {
+            thumbnailsContainer.setPositionX(dragMaxX);
+            if (isMovingByInertia) {
+                speed = 0;
+            }
+        } else {
+            thumbnailsContainer.setPositionX(positionX + scrollAmount);
+        }
     }
 
     function processControlsTouchEnd(eventX, eventY) {
@@ -120,17 +196,27 @@ lowfat.LevelSelectMenu = function (container, spriteFactory, gameStateModel, lev
     function scrollToThumbnail(thumbnail) {
         var newThumbnailContainerX = getThumbnailsContainerXToGetLevelInCenter(thumbnail);
         var diff = newThumbnailContainerX - thumbnailsContainer.getPositionX();
-        var moveAction = new cc.MoveBy(0.6, diff, 0).easing(cc.easeCubicActionOut());
-        var callFuncAction = new cc.CallFunc(scrollFinished);
-        thumbnailsContainer.runAction(new cc.Sequence(moveAction, callFuncAction));
-        touchControls.disable();
+        if (Math.abs(diff) > 0.1) {
+            var moveAction = new cc.MoveBy(0.6, diff, 0).easing(cc.easeCubicActionOut());
+            var callFuncAction = new cc.CallFunc(scrollFinished);
+            thumbnailsContainer.runAction(new cc.Sequence(moveAction, callFuncAction));
+            touchControls.disable();
+            // if (selectedThumbnail != thumbnail) {
+            //     thumbnail.highlight();
+            //     selectedThumbnail.unHighlight();
+            //     selectedThumbnail = thumbnail;
+            // }
+            function scrollFinished() {
+                touchControls.enable();
+            }
+        } else {
+            thumbnailsContainer.setPositionX(thumbnailsContainer.getPositionX() + diff);
+        }
+
         if (selectedThumbnail != thumbnail) {
             thumbnail.highlight();
             selectedThumbnail.unHighlight();
             selectedThumbnail = thumbnail;
-        }
-        function scrollFinished() {
-            touchControls.enable();
         }
     }
 
@@ -151,6 +237,7 @@ lowfat.LevelSelectMenu = function (container, spriteFactory, gameStateModel, lev
 
     return {
         start: start,
+        update: update,
         onResize: onResize
     }
 };
@@ -270,6 +357,10 @@ lowfat.LevelThumbnail = function (spriteFactory, boardInfo, levelName, state, se
         return levelName;
     }
 
+    function getCenterX() {
+        return getPositionX() + getWidth() * 0.5;
+    }
+
     function processMouseMove(eventX, eventY) {
         if (eventHitsNode(eventX, eventY)) {
             if (!isMouseOver) {
@@ -305,6 +396,7 @@ lowfat.LevelThumbnail = function (spriteFactory, boardInfo, levelName, state, se
         getPositionY: getPositionY,
         getWidth: getWidth,
         getHeight: getHeight,
+        getCenterX: getCenterX,
         processMouseMove: processMouseMove,
         processMouseClick: processMouseClick,
         highlight: highlight,

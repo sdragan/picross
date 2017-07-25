@@ -402,8 +402,13 @@ lowfat.Gamefield = function (scene, spriteFactory, gameStateModel, screenSize, r
         return true;
     }
 
+    function update(dt) {
+
+    }
+
     return {
         start: start,
+        update: update,
         onResize: onResize
     }
 };
