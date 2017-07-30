@@ -237,6 +237,8 @@ lowfat.LivesPanel = function (container, screenSize, spriteFactory) {
                 emptyIcons.push(emptyIcon);
                 container.addChild(emptyIcon);
                 emptyIcon.setPosition(getIconX(i), 680);
+            } else {
+                emptyIcon = emptyIcons[i];
             }
             emptyIcon.setVisible(i >= livesCount - 1);
         }
