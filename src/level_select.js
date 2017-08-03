@@ -197,10 +197,10 @@ lowfat.LevelSelectMenu = function (container, spriteFactory, gameStateModel, lev
         var newThumbnailContainerX = getThumbnailsContainerXToGetLevelInCenter(thumbnail);
         var diff = newThumbnailContainerX - thumbnailsContainer.getPositionX();
         if (Math.abs(diff) > 0.1) {
-            var moveAction = new cc.MoveBy(0.6, diff, 0).easing(cc.easeCubicActionOut());
+            thumbnailsContainer.stopAllActions();
+            var moveAction = new cc.MoveBy(0.5, diff, 0).easing(cc.easeCubicActionOut());
             var callFuncAction = new cc.CallFunc(scrollFinished);
             thumbnailsContainer.runAction(new cc.Sequence(moveAction, callFuncAction));
-            touchControls.disable();
         } else {
             thumbnailsContainer.setPositionX(thumbnailsContainer.getPositionX() + diff);
         }
@@ -213,7 +213,6 @@ lowfat.LevelSelectMenu = function (container, spriteFactory, gameStateModel, lev
     }
 
     function scrollFinished() {
-        touchControls.enable();
     }
 
     function getThumbnailByLevelName(levelName) {
