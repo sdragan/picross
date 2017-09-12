@@ -279,6 +279,16 @@ lowfat.LivesPanel = function (container, screenSize, spriteFactory) {
         icon.runAction(fadeAction);
     }
 
+    function clear() {
+        var i;
+        for (i = 0; i < icons.length; i++) {
+            icons[i].removeFromParent();
+        }
+        for (i = 0; i < emptyIcons.length; i++) {
+            emptyIcons[i].removeFromParent();
+        }
+    }
+
     function onResize(screenSize) {
         screenSizeInPoints = screenSize;
         var i;
@@ -293,6 +303,7 @@ lowfat.LivesPanel = function (container, screenSize, spriteFactory) {
     return {
         setInitialLives: setInitialLives,
         decrementLife: decrementLife,
+        clear: clear,
         onResize: onResize
     }
 };

@@ -8,6 +8,8 @@ var GameScene = cc.Scene.extend({
     updateReceiver: null,
 
     setup: function () {
+        this.background = lowfat.Background(lowfat.SpriteFactory, this, cc.director.getWinSize());
+        this.background.init();
         this.levelsModel = lowfat.LevelsModel();
         this.gameStateModel = lowfat.GameStateModel(this.levelsModel);
         this.gameStateModel.init(this.startBoard, this.startLevelSelect, this);
@@ -33,6 +35,7 @@ var GameScene = cc.Scene.extend({
 
     onResize: function () {
         var screenSizeInPoints = cc.director.getWinSize();
+        this.background.onResize(screenSizeInPoints);
         if (this.gamefield != null) {
             this.gamefield.onResize(screenSizeInPoints);
         }

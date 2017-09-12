@@ -29,8 +29,8 @@ lowfat.Gamefield = function (scene, spriteFactory, gameStateModel, screenSize, r
     }
 
     function initLayers() {
-        bgGradient = new cc.LayerGradient(cc.color(161, 224, 229), cc.color(76, 161, 175));
-        container.addChild(bgGradient);
+        // bgGradient = new cc.LayerGradient(cc.color(161, 224, 229), cc.color(76, 161, 175));
+        // container.addChild(bgGradient);
         boardContainer = new cc.Node();
         container.addChild(boardContainer);
         boardContainer.setPosition(boardDimensions.getContainerLeftX(), boardDimensions.getContainerBottomY());
@@ -262,11 +262,24 @@ lowfat.Gamefield = function (scene, spriteFactory, gameStateModel, screenSize, r
     function onExitLevelAnimationFinished() {
         var i;
         for (i = 0; i < gridContentSprites.length; i++) {
-            gridContentSprites.removeFromParent();
+            gridContentSprites[i].removeFromParent();
         }
         for (i = 0; i < gridCellSprites.length; i++) {
-            gridCellSprites.removeFromParent();
+            gridCellSprites[i].removeFromParent();
         }
+
+        var u;
+        for (i = 0; i < groupLabelsCols.length; i++) {
+            for (u = 0; u < groupLabelsCols[i].length; u++) {
+                groupLabelsCols[i][u].removeFromParent();
+            }
+        }
+        for (i = 0; i < groupLabelsRows.length; i++) {
+            for (u = 0; u < groupLabelsRows[i].length; u++) {
+                groupLabelsRows[i][u].removeFromParent();
+            }
+        }
+        livesPanel.clear();
         boardContainer.setOpacity(255);
     }
 
@@ -292,10 +305,12 @@ lowfat.Gamefield = function (scene, spriteFactory, gameStateModel, screenSize, r
     }
 
     function backToMenuAfterLevelWin() {
+        onExitLevelAnimationFinished();
         returnToLevelSelectCallback.call(returnToLevelSelectCallbackContext, levelName)
     }
 
     function backToMenuAfterLevelLost() {
+        onExitLevelAnimationFinished();
         returnToLevelSelectCallback.call(returnToLevelSelectCallbackContext);
     }
 

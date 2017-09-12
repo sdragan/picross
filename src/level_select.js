@@ -4,7 +4,6 @@ lowfat.LevelSelectMenu = function (container, spriteFactory, gameStateModel, lev
     var screenSizeInPoints = screenSize;
     var thumbnailsContainer = null;
     var thumbnailsContainerContainer = null;
-    var bgGradient = null;
     var touchControls = null;
     var thumbnails = null;
     var selectedThumbnail = null;
@@ -21,9 +20,6 @@ lowfat.LevelSelectMenu = function (container, spriteFactory, gameStateModel, lev
     var DIRECTION_ANY = 2;
 
     function initLayers() {
-        bgGradient = new cc.LayerGradient(cc.color(161, 224, 229), cc.color(76, 161, 175));
-        container.addChild(bgGradient);
-
         thumbnailsContainerContainer = new cc.Node();
         container.addChild(thumbnailsContainerContainer);
 
@@ -185,7 +181,6 @@ lowfat.LevelSelectMenu = function (container, spriteFactory, gameStateModel, lev
             for (var i = 0; i < thumbnails.length; i++) {
                 thumbnails[i].removeFromParent();
             }
-            bgGradient.removeFromParent();
             touchControls.disable();
             startBoardCallback.call(startBoardContext, levelName, [], [], 3);
         } else {
@@ -226,7 +221,6 @@ lowfat.LevelSelectMenu = function (container, spriteFactory, gameStateModel, lev
 
     function onResize(screenSize) {
         screenSizeInPoints = screenSize;
-        bgGradient.setContentSize(screenSizeInPoints.width, screenSizeInPoints.height);
         updateThumbnailsContainerContainerX();
     }
 
