@@ -12,7 +12,6 @@ lowfat.Gamefield = function (scene, spriteFactory, gameStateModel, screenSize, r
     var gridContentSprites = null;
     var controls = null;
     var livesLeft;
-    var bgGradient = null;
     var boardContainer = null;
     var uiContainer = null;
     var menuContainer = null;
@@ -29,8 +28,6 @@ lowfat.Gamefield = function (scene, spriteFactory, gameStateModel, screenSize, r
     }
 
     function initLayers() {
-        // bgGradient = new cc.LayerGradient(cc.color(161, 224, 229), cc.color(76, 161, 175));
-        // container.addChild(bgGradient);
         boardContainer = new cc.Node();
         container.addChild(boardContainer);
         boardContainer.setPosition(boardDimensions.getContainerLeftX(), boardDimensions.getContainerBottomY());
@@ -403,7 +400,6 @@ lowfat.Gamefield = function (scene, spriteFactory, gameStateModel, screenSize, r
     function onResize(screenSize) {
         screenSizeInPoints = screenSize;
         boardDimensions.resize(screenSizeInPoints);
-        bgGradient.setContentSize(screenSizeInPoints.width, screenSizeInPoints.height);
         boardContainer.setPositionX(boardDimensions.getContainerLeftX());
         livesPanel.onResize(screenSize);
     }
