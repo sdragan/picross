@@ -7,7 +7,7 @@ lowfat.Background = function (spriteFactory, container, initialScreenSize) {
     var bgRightSprite = null;
 
     function init() {
-        bgGradient = new cc.LayerGradient(cc.color(89, 35, 113), cc.color(33, 25, 87));
+        bgGradient = new cc.LayerGradient(cc.color(161, 224, 229), cc.color(76, 161, 175));
         container.addChild(bgGradient);
         bgLeftSprite = spriteFactory.getSprite("BgLeft", 0, 0);
         container.addChild(bgLeftSprite);
